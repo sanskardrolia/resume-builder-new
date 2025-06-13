@@ -9,20 +9,20 @@ import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
 import pdfMake from "pdfmake/build/pdfmake";
-// Standard import for vfs_fonts
-import pdfFonts from "pdfmake/build/vfs_fonts";
+// Import vfs_fonts for its side-effect. This expects vfs_fonts.js to attach 'vfs'
+// to the pdfMake instance imported above.
+import "pdfmake/build/vfs_fonts";
 
-// Assign VFS for pdfMake
-// The typical structure for pdfmake 0.1.x and 0.2.x is pdfFonts.pdfMake.vfs
-if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
-  pdfMake.vfs = pdfFonts.pdfMake.vfs;
-} else {
-  // This console.error indicates a problem with the vfs_fonts module structure or import.
+// Check if pdfMake.vfs was populated by the side-effect import.
+// This check runs once when the module is loaded on the client.
+if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) {
   console.error(
-    "CRITICAL: Failed to load pdfMake vfs_fonts. PDF font embedding will not work. Check import of 'pdfmake/build/vfs_fonts'.",
-    "Imported pdfFonts object was:", pdfFonts
+    "CRITICAL: pdfMake.vfs was not populated or is empty after importing 'pdfmake/build/vfs_fonts'. " +
+    "PDF font embedding will not work. Ensure the vfs_fonts module correctly attaches to the pdfMake instance " +
+    "or that the pdfmake and vfs_fonts versions are compatible. Current pdfMake object:", pdfMake
   );
 }
+
 
 // pdfMake uses Roboto font by default. For other fonts, .ttf files and custom configuration are needed.
 // The font selected in PersonalInfoForm will affect HtmlResumePreview, but the PDF will use Roboto.
@@ -67,13 +67,13 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         toast({ title: "Preview Loading", description: "Please wait a moment for the preview to initialize." });
         return;
     }
-    if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) { // Check if vfs is empty
+    if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) { 
       toast({
         title: "Font Error",
         description: "PDF fonts (vfs_fonts) are not loaded correctly. PDF cannot be generated with embedded fonts.",
         variant: "destructive",
       });
-      console.error("pdfMake.vfs is not set or is empty. PDF generation aborted/may be faulty.");
+      console.error("pdfMake.vfs is not set or is empty. PDF generation aborted. Check console for earlier critical errors.");
       return;
     }
 
@@ -284,5 +284,3 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
     </div>
   );
 }
-
-    
