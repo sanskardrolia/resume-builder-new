@@ -8,26 +8,30 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
-// Standard UMD/ESM import for pdfmake and vfs_fonts
-import pdfMakeLib from "pdfmake/build/pdfmake";
-import "pdfmake/build/vfs_fonts"; // Import for side effects
+// Attempt to import pdfmake and its vfs_fonts
+// Using 'import * as' for pdfmake main library as its default export seems problematic.
+import * as PdfMakeModule from "pdfmake/build/pdfmake";
+// vfs_fonts is often imported for its side-effects.
+import "pdfmake/build/vfs_fonts";
 
-// Log the imported values immediately to diagnose loading issues
-console.log("Raw import pdfMakeLib:", pdfMakeLib);
-console.log("Typeof pdfMakeLib:", typeof pdfMakeLib);
+// Resolve the actual pdfMake instance.
+// It might be in PdfMakeModule.default if it's an ES module with a default export,
+// or PdfMakeModule itself if it's a CommonJS module assimilated into an ES namespace.
+const pdfMake = (PdfMakeModule as any).default || PdfMakeModule;
 
-const pdfMake = pdfMakeLib; // Assign to the variable name expected by the rest of the code
+// Log the resolved pdfMake instance and its type
+console.log("Resolved pdfMake instance:", pdfMake);
+console.log("Typeof resolved pdfMake instance:", typeof pdfMake);
 
-// Check if pdfMake.vfs was populated by the side-effect import
-if (pdfMake && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
-  console.log("pdfMake.vfs successfully populated after side-effect import of vfs_fonts.js");
+// After importing vfs_fonts for side-effects, pdfMake.vfs should be populated.
+if (pdfMake && typeof pdfMake === 'object' && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
+  console.log("pdfMake.vfs successfully populated (likely by side-effect of importing vfs_fonts).");
 } else {
   console.error(
-    "CRITICAL: pdfMake.vfs was not populated or is empty after side-effect import of 'pdfmake/build/vfs_fonts'. " +
-    "PDF font embedding will not work. Ensure the vfs_fonts module correctly attaches to the pdfMake instance " +
-    "or that the pdfmake and vfs_fonts versions are compatible.",
-    "Current pdfMake object:", pdfMake,
-    "Current pdfMake.vfs:", pdfMake && pdfMake.vfs ? pdfMake.vfs : "N/A (pdfMake itself might be undefined or not an object)"
+    "CRITICAL: pdfMake.vfs was not populated or is empty after attempting to load pdfmake and vfs_fonts. " +
+    "PDF font embedding will not work. Check library versions and import methods.",
+    "Resolved pdfMake object:", pdfMake,
+    "pdfMake.vfs status:", pdfMake && typeof pdfMake === 'object' ? pdfMake.vfs : "N/A (pdfMake not a suitable object or vfs missing)"
   );
 }
 
