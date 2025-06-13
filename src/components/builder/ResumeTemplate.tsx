@@ -3,7 +3,7 @@
 
 import type { ResumeData } from '@/lib/types';
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Link, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Link } from '@react-pdf/renderer';
 
 interface ResumeTemplateProps {
   data: ResumeData;
