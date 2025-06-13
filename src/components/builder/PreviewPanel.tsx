@@ -10,39 +10,24 @@ import { HtmlResumePreview } from './HtmlResumePreview';
 
 // Standard UMD/ESM import for pdfmake and vfs_fonts
 import pdfMakeLib from "pdfmake/build/pdfmake";
-import pdfFontsData from "pdfmake/build/vfs_fonts";
+import "pdfmake/build/vfs_fonts"; // Import for side effects
 
 // Log the imported values immediately to diagnose loading issues
 console.log("Raw import pdfMakeLib:", pdfMakeLib);
 console.log("Typeof pdfMakeLib:", typeof pdfMakeLib);
-console.log("Raw import pdfFontsData:", pdfFontsData);
-console.log("Typeof pdfFontsData:", typeof pdfFontsData);
 
 const pdfMake = pdfMakeLib; // Assign to the variable name expected by the rest of the code
 
-// Attempt to assign VFS
-if (pdfMake && typeof pdfMake.createPdf === 'function') { // Check if pdfMake is a valid instance
-  if (pdfFontsData && pdfFontsData.pdfMake && pdfFontsData.pdfMake.vfs) {
-    pdfMake.vfs = pdfFontsData.pdfMake.vfs;
-    console.log("pdfMake.vfs assigned successfully from pdfFontsData.pdfMake.vfs");
-  } else {
-    console.error(
-      "CRITICAL: pdfFontsData structure is not as expected or is missing pdfMake.vfs.",
-      "pdfFontsData:", pdfFontsData
-    );
-  }
+// Check if pdfMake.vfs was populated by the side-effect import
+if (pdfMake && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
+  console.log("pdfMake.vfs successfully populated after side-effect import of vfs_fonts.js");
 } else {
   console.error(
-    "CRITICAL: pdfMake (pdfMakeLib) is not loaded correctly or is not a valid pdfmake instance.",
-    "pdfMakeLib:", pdfMakeLib
-  );
-}
-
-// Post-initialization check for VFS
-if (pdfMake && (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0)) {
-  console.warn(
-    "Warning: pdfMake.vfs is still unpopulated or empty after attempted assignment. PDF font embedding might fail.",
-    "Current pdfMake.vfs:", pdfMake.vfs
+    "CRITICAL: pdfMake.vfs was not populated or is empty after side-effect import of 'pdfmake/build/vfs_fonts'. " +
+    "PDF font embedding will not work. Ensure the vfs_fonts module correctly attaches to the pdfMake instance " +
+    "or that the pdfmake and vfs_fonts versions are compatible.",
+    "Current pdfMake object:", pdfMake,
+    "Current pdfMake.vfs:", pdfMake && pdfMake.vfs ? pdfMake.vfs : "N/A (pdfMake itself might be undefined or not an object)"
   );
 }
 
@@ -306,4 +291,3 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   );
 }
 
-    
