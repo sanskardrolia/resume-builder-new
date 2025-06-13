@@ -1,10 +1,11 @@
+
 "use client";
 
 import type { ResumeData } from '@/lib/types';
 import { ResumeTemplate } from './ResumeTemplate';
 import { Button } from '@/components/ui/button';
 import { Download, Eye } from 'lucide-react';
-import ReactToPrint, { useReactToPrint } from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 import React from 'react';
 
 interface PreviewPanelProps {
