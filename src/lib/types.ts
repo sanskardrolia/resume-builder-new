@@ -6,6 +6,7 @@ export interface PersonalInfo {
   phone: string;
   linkedin: string;
   summary: string;
+  fontFamily: string; // Added for font selection
 }
 
 export interface EducationEntry {
@@ -34,12 +35,22 @@ export interface ProjectEntry {
   link: string;
 }
 
+export interface CertificationEntry {
+  id: string;
+  name: string;
+  issuingOrganization: string;
+  dateEarned: string;
+  credentialId?: string;
+  credentialUrl?: string;
+}
+
 export interface ResumeData {
   personalInfo: PersonalInfo;
   education: EducationEntry[];
   workExperience: WorkExperienceEntry[];
-  hobbies: string;
   projects: ProjectEntry[];
+  certifications: CertificationEntry[];
+  hobbies: string;
 }
 
 export const initialResumeData: ResumeData = {
@@ -50,11 +61,13 @@ export const initialResumeData: ResumeData = {
     phone: '',
     linkedin: '',
     summary: '',
+    fontFamily: 'Arial, sans-serif', // Default font
   },
   education: [],
   workExperience: [],
-  hobbies: '',
   projects: [],
+  certifications: [],
+  hobbies: '',
 };
 
 export const sampleResumeData: ResumeData = {
@@ -65,6 +78,7 @@ export const sampleResumeData: ResumeData = {
     phone: '(555) 123-4567',
     linkedin: 'linkedin.com/in/johnbsample',
     summary: "Highly skilled and creative Web Developer with 5+ years of experience in designing, developing, and launching responsive websites and web applications. Proficient in a wide range of modern technologies and frameworks. Passionate about creating intuitive user experiences and efficient back-end solutions.",
+    fontFamily: 'Arial, sans-serif',
   },
   education: [
     {
@@ -116,6 +130,16 @@ export const sampleResumeData: ResumeData = {
       description: 'A full-stack task management application with user authentication and real-time updates.',
       technologies: 'React, Firebase, Node.js, Express',
       link: 'github.com/johnbsample/task-app',
+    },
+  ],
+  certifications: [
+    {
+      id: 'cert_sample_1',
+      name: 'Certified Kubernetes Administrator (CKA)',
+      issuingOrganization: 'Cloud Native Computing Foundation',
+      dateEarned: 'Dec 2021',
+      credentialId: 'LF-abc123xyz',
+      credentialUrl: 'https://example.com/cka-cert',
     },
   ],
   hobbies: 'Photography, Hiking, Contributing to open-source projects, Learning new programming languages',

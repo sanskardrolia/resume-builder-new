@@ -10,6 +10,7 @@ import { PersonalInfoForm } from './PersonalInfoForm';
 import { EducationForm } from './EducationForm';
 import { WorkExperienceForm } from './WorkExperienceForm';
 import { ProjectsForm } from './ProjectsForm';
+import { CertificationsForm } from './CertificationsForm'; // Added import
 import { HobbiesForm } from './HobbiesForm';
 
 interface EditorPanelProps {
@@ -34,12 +35,15 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
     setResumeData(prev => ({ ...prev, projects: updatedEntries }));
   };
 
+  const handleCertificationsChange = (updatedEntries: ResumeData['certifications']) => { // Added handler
+    setResumeData(prev => ({ ...prev, certifications: updatedEntries }));
+  };
+
   const handleHobbiesChange = (value: string) => {
     setResumeData(prev => ({ ...prev, hobbies: value }));
   };
 
   const loadSampleData = () => {
-    // Deep copy sample data to avoid direct mutation issues if any part of the sample data object is shared or complex
     const deepCopiedSampleData = JSON.parse(JSON.stringify(sampleResumeData));
     setResumeData(deepCopiedSampleData);
   };
@@ -76,6 +80,12 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Personal Projects</AccordionTrigger>
           <AccordionContent>
             <ProjectsForm data={resumeData.projects} onChange={handleProjectsChange} />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="certifications"> {/* Added Certifications Accordion Item */}
+          <AccordionTrigger className="font-headline text-lg hover:no-underline">Certifications</AccordionTrigger>
+          <AccordionContent>
+            <CertificationsForm data={resumeData.certifications} onChange={handleCertificationsChange} />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="hobbies">

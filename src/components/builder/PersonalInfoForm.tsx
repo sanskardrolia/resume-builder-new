@@ -1,16 +1,27 @@
+
 "use client";
 
 import type { PersonalInfo } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { User } from 'lucide-react';
+import { User, Palette } from 'lucide-react';
 import { ResumeFormSection } from './ResumeFormSection';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PersonalInfoFormProps {
   data: PersonalInfo;
   onChange: (field: keyof PersonalInfo, value: string) => void;
 }
+
+const fontOptions = [
+  { value: 'Arial, Helvetica, sans-serif', label: 'Arial' },
+  { value: 'Cambria, Cochin, Georgia, Times, "Times New Roman", serif', label: 'Cambria' },
+  { value: 'Garamond, Baskerville, "Baskerville Old Face", "Hoefler Text", "Times New Roman", serif', label: 'Garamond' },
+  { value: '"Times New Roman", Times, serif', label: 'Times New Roman' },
+  { value: 'Verdana, Geneva, sans-serif', label: 'Verdana' },
+  { value: 'Georgia, serif', label: 'Georgia' },
+];
 
 export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
   return (
@@ -43,6 +54,21 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
         <div>
           <Label htmlFor="summary">Professional Summary</Label>
           <Textarea id="summary" value={data.summary} onChange={(e) => onChange('summary', e.target.value)} placeholder="A brief summary of your skills and experience..." rows={4} />
+        </div>
+        <div>
+          <Label htmlFor="fontFamily" className="flex items-center gap-2"><Palette className="w-4 h-4 text-muted-foreground" />Resume Font</Label>
+          <Select value={data.fontFamily} onValueChange={(value) => onChange('fontFamily', value)}>
+            <SelectTrigger id="fontFamily">
+              <SelectValue placeholder="Select a font" />
+            </SelectTrigger>
+            <SelectContent>
+              {fontOptions.map(font => (
+                <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                  {font.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </ResumeFormSection>
