@@ -10,9 +10,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['PT Sans', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
+        body: ['PT Sans', 'sans-serif'], // Default body font for the app UI
+        headline: ['Poppins', 'sans-serif'], // Default headline font for the app UI
         code: ['monospace'],
+        // Resume-specific fonts are handled by @react-pdf/renderer
+        // and selected in PersonalInfoForm. The `personalInfo.fontFamily`
+        // string is then interpreted by ResumeTemplate.tsx.
       },
       colors: {
         background: 'hsl(var(--background))',
