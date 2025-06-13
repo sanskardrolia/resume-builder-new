@@ -8,30 +8,46 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
-// Attempt to import pdfmake and its vfs_fonts
-// Using 'import * as' for pdfmake main library as its default export seems problematic.
-import * as PdfMakeModule from "pdfmake/build/pdfmake";
-// vfs_fonts is often imported for its side-effects.
-import "pdfmake/build/vfs_fonts";
+// Attempt to import pdfmake and its vfs_fonts with explicit .js extensions
+// Log the PdfMakeModule to see its actual structure.
+import * as PdfMakeModule from "pdfmake/build/pdfmake.js";
+
+console.log("Raw PdfMakeModule import:", PdfMakeModule);
 
 // Resolve the actual pdfMake instance.
-// It might be in PdfMakeModule.default if it's an ES module with a default export,
-// or PdfMakeModule itself if it's a CommonJS module assimilated into an ES namespace.
-const pdfMake = (PdfMakeModule as any).default || PdfMakeModule;
+let pdfMakeInstance: any;
+if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as any).default.createPdf === 'function') {
+  pdfMakeInstance = (PdfMakeModule as any).default;
+  console.log("Using PdfMakeModule.default as pdfMake instance.");
+} else if (PdfMakeModule && typeof (PdfMakeModule as any).createPdf === 'function') {
+  pdfMakeInstance = PdfMakeModule; // The namespace itself might be the library instance
+  console.log("Using PdfMakeModule itself (namespace) as pdfMake instance.");
+} else {
+  pdfMakeInstance = {}; // Fallback to prevent errors, but indicates a problem
+  console.error("CRITICAL: Could not resolve a valid pdfMake instance from PdfMakeModule. PdfMakeModule content:", PdfMakeModule);
+}
 
-// Log the resolved pdfMake instance and its type
-console.log("Resolved pdfMake instance:", pdfMake);
+// Assign to pdfMake, which is used throughout the component
+const pdfMake = pdfMakeInstance;
+
+console.log("Resolved pdfMake instance for component use:", pdfMake);
 console.log("Typeof resolved pdfMake instance:", typeof pdfMake);
 
-// After importing vfs_fonts for side-effects, pdfMake.vfs should be populated.
+// Now, import vfs_fonts for its side-effects.
+// This relies on vfs_fonts.js modifying the pdfMake instance we (hopefully) just loaded.
+// If pdfMake is global or discoverable by vfs_fonts.js, this might work.
+import "pdfmake/build/vfs_fonts.js"; 
+
+// Check if vfs was populated on the resolved pdfMake instance
 if (pdfMake && typeof pdfMake === 'object' && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
-  console.log("pdfMake.vfs successfully populated (likely by side-effect of importing vfs_fonts).");
+  console.log("pdfMake.vfs successfully populated (likely by side-effect of importing vfs_fonts.js).");
 } else {
   console.error(
-    "CRITICAL: pdfMake.vfs was not populated or is empty after attempting to load pdfmake and vfs_fonts. " +
-    "PDF font embedding will not work. Check library versions and import methods.",
-    "Resolved pdfMake object:", pdfMake,
-    "pdfMake.vfs status:", pdfMake && typeof pdfMake === 'object' ? pdfMake.vfs : "N/A (pdfMake not a suitable object or vfs missing)"
+    "CRITICAL: pdfMake.vfs was not populated or is empty AFTER side-effect import. " +
+    "PDF font embedding will not work. Ensure the vfs_fonts.js module correctly attaches to the pdfMake instance " +
+    "or that the pdfmake and vfs_fonts versions are compatible.",
+    "Current resolved pdfMake object:", pdfMake,
+    "Current pdfMake.vfs:", pdfMake && typeof pdfMake === 'object' ? pdfMake.vfs : "N/A (pdfMake itself might be invalid or not an object)"
   );
 }
 
@@ -80,10 +96,10 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
     if (!pdfMake || typeof pdfMake.createPdf !== 'function' || !pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) { 
       toast({
         title: "PDF Generation Error",
-        description: "pdfMake library or its fonts (vfs) are not loaded correctly. PDF cannot be generated.",
+        description: "pdfMake library or its fonts (vfs) are not loaded correctly. PDF cannot be generated. Check console logs for details.",
         variant: "destructive",
       });
-      console.error("pdfMake.createPdf is not a function or pdfMake.vfs is not set/empty. PDF generation aborted. Check console for earlier critical errors.", "pdfMake object:", pdfMake);
+      console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake.vfs is not set/empty.", "pdfMake object:", pdfMake, "pdfMake.vfs:", pdfMake && pdfMake.vfs ? pdfMake.vfs : 'N/A');
       return;
     }
 
@@ -143,7 +159,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           content.push({ text: `${exp.company} | ${formatDateRange(exp.startDate, exp.endDate)}`, style: 'itemSubtitle' });
           if (exp.responsibilities) {
             content.push({
-              ul: exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line),
+              ul: exp.responsibilities.split('\\n').map(line => line.trim()).filter(line => line),
               style: 'list',
               margin: [0, 1, 0, 4]
             });
@@ -163,7 +179,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       }
       
       if (skills) {
-        const skillsList = skills.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+        const skillsList = skills.split(/[\\n,]+/).map(s => s.trim()).filter(Boolean);
         if (skillsList.length > 0) {
           content.push({ text: 'Skills', style: 'sectionHeader' });
           content.push({ text: skillsList.join(', '), style: 'paragraph', margin: [0, 0, 0, 5] });
@@ -210,7 +226,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       }
 
       if (hobbies) {
-        const hobbiesList = hobbies.split(/[\n,]+/).map(h => h.trim()).filter(Boolean);
+        const hobbiesList = hobbies.split(/[\\n,]+/).map(h => h.trim()).filter(Boolean);
         if (hobbiesList.length > 0) {
           content.push({ text: 'Hobbies & Interests', style: 'sectionHeader' });
           content.push({ text: hobbiesList.join(', '), style: 'paragraph', margin: [0,0,0,5] });
@@ -220,7 +236,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       const documentDefinition = {
         content: content,
         defaultStyle: {
-          font: 'Roboto',
+          font: 'Roboto', // This requires Roboto to be in pdfMake.vfs
           fontSize: 9,
           lineHeight: 1.2,
         },
@@ -289,9 +305,10 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
         Note: The PDF is generated programmatically with pdfMake and uses 'Roboto' font by default.
-        The preview above shows HTML rendering which may differ slightly, especially with custom fonts.
+        The HTML preview above may differ slightly, especially with custom fonts not available in pdfMake by default.
+        If fonts are missing in PDF, check console logs for VFS loading status.
       </p>
     </div>
   );
 }
-
+    
