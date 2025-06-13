@@ -21,6 +21,7 @@ export default function HomePage() {
         </Button>
       </section>
 
+      {/* 
       <section className="py-16 md:py-24">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl font-semibold">Why Fresher Resume Builder?</h2>
@@ -28,7 +29,7 @@ export default function HomePage() {
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           <FeatureCard
-            icon={<PenLine className="w-10 h-10 text-primary mb-4" />} {/* Changed Edit3 to PenLine */}
+            icon={<PenLine className="w-10 h-10 text-primary mb-4" />}
             title="Intuitive Editor"
             description="Easily input your personal details, education, experience, and more with our user-friendly interface."
           />
@@ -49,6 +50,7 @@ export default function HomePage() {
           />
         </div>
       </section>
+      */}
       
       <section className="py-16 md:py-24 bg-secondary/50 rounded-lg matte-glass">
          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
@@ -68,9 +70,8 @@ export default function HomePage() {
                  <Image 
                     src="https://placehold.co/600x400.png" 
                     alt="Resume building process" 
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-lg shadow-xl"
+                    fill
+                    className="rounded-lg shadow-xl object-cover"
                     data-ai-hint="resume computer"
                  />
             </div>
