@@ -4,14 +4,25 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react'; // Removed useEffect as client state is no longer used
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview'; // For visual preview only
 
 // Import pdfmake
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+// Assign vfs to pdfMake. The @types/pdfmake suggest that pdfFonts (the import from vfs_fonts)
+// is an object with a .vfs property directly.
+if (pdfFonts && (pdfFonts as any).vfs) {
+  pdfMake.vfs = (pdfFonts as any).vfs;
+} else if (pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) {
+  // Fallback to the older structure just in case, though types suggest the above.
+  pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
+} else {
+  console.error("Could not load pdfmake vfs fonts. PDF generation might fail or use default fonts.");
+}
+
 // pdfMake uses Roboto font by default. For other fonts, .ttf files and custom configuration are needed.
 // The font selected in PersonalInfoForm will affect HtmlResumePreview, but the PDF will use Roboto.
 
@@ -238,3 +249,4 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
     </div>
   );
 }
+
