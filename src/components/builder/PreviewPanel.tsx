@@ -4,52 +4,25 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
 import pdfMake from "pdfmake/build/pdfmake";
-// Try to import vfs_fonts with a structure that might be more robust
-import * as pdfFontsAll from "pdfmake/build/vfs_fonts";
+// Standard import for vfs_fonts
+import pdfFonts from "pdfmake/build/vfs_fonts";
 
-// Assign VFS
-// Based on type definitions, pdfFontsAll from "pdfmake/build/vfs_fonts" should have a `pdfMake` property
-// which in turn has `vfs`.
-// { pdfMake: { vfs: { ... } } }
-// However, direct import often makes pdfFontsAll itself the object with vfs
-try {
-  if (pdfFontsAll && (pdfFontsAll as any).pdfMake && (pdfFontsAll as any).pdfMake.vfs) {
-    pdfMake.vfs = (pdfFontsAll as any).pdfMake.vfs;
-  } else if (pdfFontsAll && (pdfFontsAll as any).vfs) { // Fallback if the structure is { vfs: ... } directly
-     pdfMake.vfs = (pdfFontsAll as any).vfs;
-  } else {
-    // Attempt to require if import fails (less ideal for client-side, but a fallback)
-    const pdfFontsRequire = require("pdfmake/build/vfs_fonts");
-    if (pdfFontsRequire && pdfFontsRequire.pdfMake && pdfFontsRequire.pdfMake.vfs) {
-        pdfMake.vfs = pdfFontsRequire.pdfMake.vfs;
-    } else if (pdfFontsRequire && pdfFontsRequire.vfs) {
-        pdfMake.vfs = pdfFontsRequire.vfs;
-    } else {
-      console.error("Could not load pdfmake vfs_fonts. PDF generation might fail or use default fonts.");
-    }
-  }
-} catch (e) {
-    console.error("Error loading vfs_fonts, attempting require: ", e);
-    // Fallback attempt with require for environments where ES6 import might behave differently for vfs_fonts
-    try {
-        const pdfFontsRequire = require("pdfmake/build/vfs_fonts");
-        if (pdfFontsRequire && pdfFontsRequire.pdfMake && pdfFontsRequire.pdfMake.vfs) {
-            pdfMake.vfs = pdfFontsRequire.pdfMake.vfs;
-        } else if (pdfFontsRequire && pdfFontsRequire.vfs) {
-            pdfMake.vfs = pdfFontsRequire.vfs;
-        } else {
-          console.error("Secondary attempt to load pdfmake vfs_fonts via require also failed.");
-        }
-    } catch (e2) {
-        console.error("Error loading vfs_fonts via require: ", e2);
-    }
+// Assign VFS for pdfMake
+// The typical structure for pdfmake 0.1.x and 0.2.x is pdfFonts.pdfMake.vfs
+if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
+  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+} else {
+  // This console.error indicates a problem with the vfs_fonts module structure or import.
+  console.error(
+    "CRITICAL: Failed to load pdfMake vfs_fonts. PDF font embedding will not work. Check import of 'pdfmake/build/vfs_fonts'.",
+    "Imported pdfFonts object was:", pdfFonts
+  );
 }
-
 
 // pdfMake uses Roboto font by default. For other fonts, .ttf files and custom configuration are needed.
 // The font selected in PersonalInfoForm will affect HtmlResumePreview, but the PDF will use Roboto.
@@ -68,7 +41,7 @@ const formatDateRange = (startDate?: string, endDate?: string) => {
 const ensureFullUrl = (urlInput: string, isGithubUsername: boolean = false) => {
   if (!urlInput) return '';
   if (isGithubUsername) {
-    if (urlInput.includes('github.com')) { 
+    if (urlInput.includes('github.com')) {
         return urlInput.startsWith('http') ? urlInput : `https://${urlInput}`;
     }
     return `https://github.com/${urlInput}`;
@@ -82,7 +55,6 @@ const ensureFullUrl = (urlInput: string, isGithubUsername: boolean = false) => {
 export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-   // Add state for client-side rendering guard for pdfMake related operations
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -95,13 +67,13 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         toast({ title: "Preview Loading", description: "Please wait a moment for the preview to initialize." });
         return;
     }
-    if (!pdfMake.vfs) {
+    if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) { // Check if vfs is empty
       toast({
         title: "Font Error",
-        description: "PDF fonts are not loaded. Cannot generate PDF.",
+        description: "PDF fonts (vfs_fonts) are not loaded correctly. PDF cannot be generated with embedded fonts.",
         variant: "destructive",
       });
-      console.error("pdfMake.vfs is not set. PDF generation aborted.");
+      console.error("pdfMake.vfs is not set or is empty. PDF generation aborted/may be faulty.");
       return;
     }
 
@@ -145,7 +117,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           text: contactDetailsForPdf,
           alignment: 'center',
           style: 'contactLine',
-          margin: [0, 0, 0, 5] 
+          margin: [0, 0, 0, 5]
         });
       }
 
@@ -163,7 +135,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             content.push({
               ul: exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line),
               style: 'list',
-              margin: [0, 1, 0, 4] 
+              margin: [0, 1, 0, 4]
             });
           }
         });
@@ -222,7 +194,6 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
            if (credDetailsArray.length > 0) {
             content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] });
           } else {
-             // Add a small bottom margin even if no cred details, unless it's the last item
             content.push({text: '', margin: [0,0,0, cert === certifications[certifications.length -1] ? 0 : 2]});
           }
         });
@@ -239,28 +210,28 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       const documentDefinition = {
         content: content,
         defaultStyle: {
-          font: 'Roboto', 
-          fontSize: 9, 
-          lineHeight: 1.2, 
+          font: 'Roboto',
+          fontSize: 9,
+          lineHeight: 1.2,
         },
         styles: {
-          name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] }, 
-          title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] }, 
-          contactLine: { fontSize: 8, color: '#444444' }, 
+          name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] },
+          title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] },
+          contactLine: { fontSize: 8, color: '#444444' },
           contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] },
-          sectionHeader: { fontSize: 10, bold: true, margin: [0, 5, 0, 2], decoration: 'underline' }, 
-          itemTitle: { fontSize: 9, bold: true, margin: [0, 2, 0, 0] }, 
-          itemSubtitle: { fontSize: 8, italic: true, color: '#333333', margin: [0, 0, 0, 1] }, 
-          paragraph: { margin: [0, 0, 0, 3], alignment: 'justify' }, 
-          list: { margin: [10, 1, 0, 3], lineHeight: 1.1 }, 
-          detailsText: { fontSize: 8, margin: [0, 0, 0, 1] }, 
+          sectionHeader: { fontSize: 10, bold: true, margin: [0, 5, 0, 2], decoration: 'underline' },
+          itemTitle: { fontSize: 9, bold: true, margin: [0, 2, 0, 0] },
+          itemSubtitle: { fontSize: 8, italic: true, color: '#333333', margin: [0, 0, 0, 1] },
+          paragraph: { margin: [0, 0, 0, 3], alignment: 'justify' },
+          list: { margin: [10, 1, 0, 3], lineHeight: 1.1 },
+          detailsText: { fontSize: 8, margin: [0, 0, 0, 1] },
           technologies: { fontSize: 8, italic: true, color: '#555555', margin: [0,0,0,1]},
           link: { color: 'blue', decoration: 'underline', fontSize: 8 }
         },
-        pageMargins: [ 30, 20, 30, 20 ], 
+        pageMargins: [ 30, 20, 30, 20 ],
       };
 
-      pdfMake.createPdf(documentDefinition).download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-FresherResumeBuilder.pdf`); // Changed name
+      pdfMake.createPdf(documentDefinition).download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-FresherResumeBuilder.pdf`);
 
       toast({
         title: "PDF Generated",
@@ -286,10 +257,10 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           <Eye className="w-6 h-6 text-primary" />
           HTML Preview
         </h2>
-        <Button 
-          className="font-headline" 
-          onClick={handleDownloadPdf} 
-          disabled={isLoading || !isClient} // Disable button if not client or loading
+        <Button
+          className="font-headline"
+          onClick={handleDownloadPdf}
+          disabled={isLoading || !isClient}
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -299,15 +270,15 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           {isLoading ? 'Generating PDF...' : 'Download PDF'}
         </Button>
       </div>
-      <div 
+      <div
         className="overflow-auto flex-grow w-full h-[calc(100%-6rem)] border rounded-md bg-white p-2 shadow-inner"
       >
-        <div className="w-full"> 
+        <div className="w-full">
            {isClient ? <HtmlResumePreview data={resumeData} /> : <p>Loading preview...</p>}
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated programmatically with pdfMake and uses 'Roboto' font by default. 
+        Note: The PDF is generated programmatically with pdfMake and uses 'Roboto' font by default.
         The preview above shows HTML rendering which may differ slightly, especially with custom fonts.
       </p>
     </div>
