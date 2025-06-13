@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, PenLine, FileText, Download } from 'lucide-react';
+import { Smile, PenLine, FileText, Download } from 'lucide-react';
 import Image from 'next/image';
 
 export default function HomePage() {
@@ -21,7 +21,6 @@ export default function HomePage() {
         </Button>
       </section>
 
-      {/* 
       <section className="py-16 md:py-24">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl font-semibold">Why Fresher Resume Builder?</h2>
@@ -39,7 +38,7 @@ export default function HomePage() {
             description="Our resume structure is optimized for Applicant Tracking Systems, ensuring your resume gets seen by recruiters."
           />
           <FeatureCard
-            icon={<CheckCircle className="w-10 h-10 text-primary mb-4" />}
+            icon={<Smile className="w-10 h-10 text-primary mb-4" />}
             title="Live Preview"
             description="See your resume take shape in real-time as you type. No surprises, just a perfect resume."
           />
@@ -50,7 +49,6 @@ export default function HomePage() {
           />
         </div>
       </section>
-      */}
       
       <section className="py-16 md:py-24 bg-secondary/50 rounded-lg matte-glass">
          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
