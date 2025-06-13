@@ -8,7 +8,7 @@ export interface PersonalInfo {
   github?: string; // GitHub username
   portfolioUrl?: string; // Full URL to personal portfolio
   summary: string;
-  fontFamily: string; // Added for font selection
+  // fontFamily: string; // Removed for font selection
 }
 
 export interface EducationEntry {
@@ -66,7 +66,7 @@ export const initialResumeData: ResumeData = {
     github: '',
     portfolioUrl: '',
     summary: '',
-    fontFamily: 'Arial, sans-serif', // Default font
+    // fontFamily: 'Arial, sans-serif', // Default font removed
   },
   education: [],
   workExperience: [],
@@ -86,7 +86,7 @@ export const sampleResumeData: ResumeData = {
     github: 'johnbsample',
     portfolioUrl: 'https://johnbsample.dev',
     summary: "Highly skilled and creative Web Developer with 5+ years of experience in designing, developing, and launching responsive websites and web applications. Proficient in a wide range of modern technologies and frameworks. Passionate about creating intuitive user experiences and efficient back-end solutions.",
-    fontFamily: 'Arial, sans-serif',
+    // fontFamily: 'Arial, sans-serif', // Removed
   },
   education: [
     {

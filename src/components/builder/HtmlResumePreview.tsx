@@ -31,10 +31,10 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
   const hobbiesList = hobbies?.split(/[\n,]+/).map(h => h.trim()).filter(Boolean) || [];
 
   const baseFontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
-  const selectedFontFamily = personalInfo.fontFamily || baseFontFamily;
+  // Removed selectedFontFamily as font selection is removed. Always use baseFontFamily.
 
   const styles = `
-    .resume-preview-container { font-family: ${selectedFontFamily}; font-size: 10pt; line-height: 1.35; color: #333; background-color: white; padding: 25px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .resume-preview-container { font-family: ${baseFontFamily}; font-size: 10pt; line-height: 1.35; color: #333; background-color: white; padding: 25px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     .headerSection { text-align: center; margin-bottom: 15px; }
     .name { font-size: 22pt; font-weight: bold; margin-bottom: 1px; }
     .title { font-size: 13pt; color: #555; margin-bottom: 4px; }
