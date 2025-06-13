@@ -10,7 +10,8 @@ import { PersonalInfoForm } from './PersonalInfoForm';
 import { EducationForm } from './EducationForm';
 import { WorkExperienceForm } from './WorkExperienceForm';
 import { ProjectsForm } from './ProjectsForm';
-import { CertificationsForm } from './CertificationsForm'; // Added import
+import { CertificationsForm } from './CertificationsForm';
+import { SkillsForm } from './SkillsForm'; // Added import
 import { HobbiesForm } from './HobbiesForm';
 
 interface EditorPanelProps {
@@ -35,8 +36,12 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
     setResumeData(prev => ({ ...prev, projects: updatedEntries }));
   };
 
-  const handleCertificationsChange = (updatedEntries: ResumeData['certifications']) => { // Added handler
+  const handleCertificationsChange = (updatedEntries: ResumeData['certifications']) => {
     setResumeData(prev => ({ ...prev, certifications: updatedEntries }));
+  };
+
+  const handleSkillsChange = (value: string) => { // Added handler
+    setResumeData(prev => ({ ...prev, skills: value }));
   };
 
   const handleHobbiesChange = (value: string) => {
@@ -76,13 +81,19 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
             <WorkExperienceForm data={resumeData.workExperience} onChange={handleWorkExperienceChange} />
           </AccordionContent>
         </AccordionItem>
+         <AccordionItem value="skills"> {/* Added Skills Accordion Item */}
+          <AccordionTrigger className="font-headline text-lg hover:no-underline">Skills</AccordionTrigger>
+          <AccordionContent>
+            <SkillsForm data={resumeData.skills} onChange={handleSkillsChange} />
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="projects">
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Personal Projects</AccordionTrigger>
           <AccordionContent>
             <ProjectsForm data={resumeData.projects} onChange={handleProjectsChange} />
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="certifications"> {/* Added Certifications Accordion Item */}
+        <AccordionItem value="certifications">
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Certifications</AccordionTrigger>
           <AccordionContent>
             <CertificationsForm data={resumeData.certifications} onChange={handleCertificationsChange} />

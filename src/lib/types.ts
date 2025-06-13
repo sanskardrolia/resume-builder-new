@@ -52,6 +52,7 @@ export interface ResumeData {
   workExperience: WorkExperienceEntry[];
   projects: ProjectEntry[];
   certifications: CertificationEntry[];
+  skills: string; // Added skills field
   hobbies: string;
 }
 
@@ -71,6 +72,7 @@ export const initialResumeData: ResumeData = {
   workExperience: [],
   projects: [],
   certifications: [],
+  skills: '',
   hobbies: '',
 };
 
@@ -148,5 +150,6 @@ export const sampleResumeData: ResumeData = {
       credentialUrl: 'https://example.com/cka-cert',
     },
   ],
+  skills: 'JavaScript, TypeScript, React, Node.js, Express.js, Python, Django, SQL, PostgreSQL, MongoDB, Docker, Kubernetes, AWS, HTML5, CSS3, TailwindCSS, Git',
   hobbies: 'Photography, Hiking, Contributing to open-source projects, Learning new programming languages',
 };

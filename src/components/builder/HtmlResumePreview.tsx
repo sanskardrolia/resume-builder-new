@@ -25,34 +25,36 @@ const ensureFullUrl = (urlInput: string) => {
 };
 
 export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
-  const { personalInfo, education, workExperience, projects, certifications, hobbies } = data;
+  const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
 
+  const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
   const hobbiesList = hobbies?.split(/[\n,]+/).map(h => h.trim()).filter(Boolean) || [];
 
   const baseFontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
   const selectedFontFamily = personalInfo.fontFamily || baseFontFamily;
 
   const styles = `
-    .resume-preview-container { font-family: ${selectedFontFamily}; font-size: 10pt; line-height: 1.4; color: #333; background-color: white; padding: 30px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .headerSection { text-align: center; margin-bottom: 20px; }
-    .name { font-size: 24pt; font-weight: bold; margin-bottom: 2px; }
-    .title { font-size: 14pt; color: #555; margin-bottom: 5px; }
-    .contactInfo { display: flex; justify-content: center; flex-wrap: wrap; font-size: 9pt; color: #444; }
-    .contactText { margin: 0 5px; }
+    .resume-preview-container { font-family: ${selectedFontFamily}; font-size: 10pt; line-height: 1.35; color: #333; background-color: white; padding: 25px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .headerSection { text-align: center; margin-bottom: 15px; }
+    .name { font-size: 22pt; font-weight: bold; margin-bottom: 1px; }
+    .title { font-size: 13pt; color: #555; margin-bottom: 4px; }
+    .contactInfo { display: flex; justify-content: center; flex-wrap: wrap; font-size: 9pt; color: #444; margin-bottom: 10px; }
+    .contactText { margin: 0 4px; }
     .contactLink { color: #007bff; text-decoration: none; }
-    .section { margin-bottom: 15px; }
-    .sectionTitle { font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 8px; }
-    .paragraph { font-size: 10pt; text-align: justify; white-space: pre-wrap; }
-    .entry { margin-bottom: 10px; }
+    .section { margin-bottom: 12px; }
+    .sectionTitle { font-size: 11pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 2px; margin-bottom: 6px; }
+    .paragraph { font-size: 9.5pt; text-align: justify; white-space: pre-wrap; margin-bottom: 8px; }
+    .entry { margin-bottom: 8px; }
     .entryHeader { display: flex; justify-content: space-between; align-items: baseline; }
     .itemTitle { font-size: 10pt; font-weight: bold; }
-    .itemSubTitle { font-size: 9pt; font-style: italic; color: #555; margin-bottom: 2px; }
+    .itemSubTitle { font-size: 9pt; font-style: italic; color: #555; margin-bottom: 1px; }
     .itemDates { font-size: 9pt; color: #555; white-space: nowrap; }
-    .list { margin: 0; padding-left: 20px; }
-    .listItem { font-size: 10pt; margin-bottom: 2px; }
-    .detailsText { font-size: 9pt; margin-top: 2px; white-space: pre-wrap; }
-    .technologies { font-size: 9pt; margin-top: 2px; }
-    .hobbiesText { font-size: 10pt; }
+    .list { margin: 0; padding-left: 18px; }
+    .listItem { font-size: 9.5pt; margin-bottom: 1px; }
+    .detailsText { font-size: 9pt; margin-top: 1px; white-space: pre-wrap; }
+    .technologies { font-size: 9pt; margin-top: 1px; }
+    .skillsText { font-size: 9.5pt; }
+    .hobbiesText { font-size: 9.5pt; }
     a { color: #007bff; text-decoration: none; }
   `;
 
@@ -128,6 +130,13 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
                 {edu.details && <div className="detailsText">{edu.details}</div>}
               </div>
             ))}
+          </div>
+        )}
+
+        {skillsList.length > 0 && (
+          <div className="section">
+            <div className="sectionTitle">Skills</div>
+            <div className="skillsText">{skillsList.join(', ')}</div>
           </div>
         )}
         

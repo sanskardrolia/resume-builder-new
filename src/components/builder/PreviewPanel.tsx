@@ -4,21 +4,25 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
 import pdfMake from "pdfmake/build/pdfmake";
-import { pdfMake as pdfMakeWithFontsVfs } from "pdfmake/build/vfs_fonts"; // Renamed for clarity
+// Try to import vfs_fonts with a structure that might be more robust
+// It seems the default export *is* the object containing pdfMake, which then contains vfs
+import * as pdfFontsAll from "pdfmake/build/vfs_fonts";
 
-if (pdfMakeWithFontsVfs && pdfMakeWithFontsVfs.vfs) {
-  pdfMake.vfs = pdfMakeWithFontsVfs.vfs;
-} else if ((pdfMakeWithFontsVfs as any)?.pdfMake?.vfs) { // Fallback for potential different structure
-   pdfMake.vfs = (pdfMakeWithFontsVfs as any).pdfMake.vfs;
+// Assign VFS
+if (pdfFontsAll && (pdfFontsAll as any).pdfMake && (pdfFontsAll as any).pdfMake.vfs) {
+  pdfMake.vfs = (pdfFontsAll as any).pdfMake.vfs;
+} else if (pdfFontsAll && (pdfFontsAll as any).vfs) { // Fallback if the structure is { vfs: ... } directly
+   pdfMake.vfs = (pdfFontsAll as any).vfs;
 }
 else {
-  console.error("Could not load pdfmake vfs fonts using named import. PDF generation might fail or use default fonts.");
+  console.error("Could not load pdfmake vfs fonts. PDF generation might fail or use default fonts.");
 }
+
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -34,7 +38,7 @@ const formatDateRange = (startDate?: string, endDate?: string) => {
 const ensureFullUrl = (urlInput: string, isGithubUsername: boolean = false) => {
   if (!urlInput) return '';
   if (isGithubUsername) {
-    if (urlInput.includes('github.com')) { // User might enter full URL
+    if (urlInput.includes('github.com')) { 
         return urlInput.startsWith('http') ? urlInput : `https://${urlInput}`;
     }
     return `https://github.com/${urlInput}`;
@@ -53,7 +57,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   const handleDownloadPdf = async () => {
     setIsLoading(true);
     try {
-      const { personalInfo, education, workExperience, projects, certifications, hobbies } = resumeData;
+      const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = resumeData;
 
       const content: any[] = [];
 
@@ -62,7 +66,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         content.push({ text: personalInfo.name, style: 'name', alignment: 'center' });
       }
       if (personalInfo.title) {
-        content.push({ text: personalInfo.title, style: 'title', alignment: 'center', margin: [0, 0, 0, 5] });
+        content.push({ text: personalInfo.title, style: 'title', alignment: 'center', margin: [0, 0, 0, 3] });
       }
       
       const contactDetailsForPdf: any[] = [];
@@ -91,13 +95,13 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           text: contactDetailsForPdf,
           alignment: 'center',
           style: 'contactLine',
-          margin: [0, 0, 0, 10]
+          margin: [0, 0, 0, 5] // Reduced margin after contact line
         });
       }
 
       if (personalInfo.summary) {
         content.push({ text: 'Summary', style: 'sectionHeader' });
-        content.push({ text: personalInfo.summary, style: 'paragraph', margin: [0, 0, 0, 10] });
+        content.push({ text: personalInfo.summary, style: 'paragraph', margin: [0, 0, 0, 5] }); // Reduced bottom margin
       }
 
       if (workExperience && workExperience.length > 0) {
@@ -109,7 +113,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             content.push({
               ul: exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line),
               style: 'list',
-              margin: [0, 2, 0, 8]
+              margin: [0, 1, 0, 4] // Reduced list item bottom margin
             });
           }
         });
@@ -121,9 +125,17 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           content.push({ text: edu.degree, style: 'itemTitle' });
           content.push({ text: `${edu.institution} | ${formatDateRange(edu.startDate, edu.endDate)}`, style: 'itemSubtitle' });
           if (edu.details) {
-            content.push({ text: edu.details, style: 'detailsText', margin: [0, 2, 0, 8] });
+            content.push({ text: edu.details, style: 'detailsText', margin: [0, 1, 0, 4] }); // Reduced bottom margin
           }
         });
+      }
+      
+      if (skills) {
+        const skillsList = skills.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+        if (skillsList.length > 0) {
+          content.push({ text: 'Skills', style: 'sectionHeader' });
+          content.push({ text: skillsList.join(', '), style: 'paragraph', margin: [0, 0, 0, 5] });
+        }
       }
 
       if (projects && projects.length > 0) {
@@ -134,9 +146,9 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             projectHeader.push({ text: 'Link', link: ensureFullUrl(proj.link), style: 'link', margin: [5,0,0,0]});
           }
           content.push({ columns: projectHeader });
-          content.push({ text: proj.description, style: 'detailsText', margin: [0,2,0,0] });
+          content.push({ text: proj.description, style: 'detailsText', margin: [0,1,0,0] });
           if (proj.technologies) {
-            content.push({ text: `Technologies: ${proj.technologies}`, style: 'technologies', margin: [0,0,0,8] });
+            content.push({ text: `Technologies: ${proj.technologies}`, style: 'technologies', margin: [0,0,0,4] }); // Reduced bottom margin
           }
         });
       }
@@ -158,9 +170,10 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             credDetailsArray.push({ text: 'Verify', link: ensureFullUrl(cert.credentialUrl), style: 'link' });
           }
            if (credDetailsArray.length > 0) {
-            content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,8] });
+            content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] }); // Reduced bottom margin
           } else {
-            content.push({text: '', margin: [0,0,0,8]}); // Ensure consistent spacing
+             // Ensure consistent spacing even if no cred details
+            content.push({text: '', margin: [0,0,0, cert === certifications[certifications.length -1] ? 0 : 2]});
           }
         });
       }
@@ -169,7 +182,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         const hobbiesList = hobbies.split(/[\n,]+/).map(h => h.trim()).filter(Boolean);
         if (hobbiesList.length > 0) {
           content.push({ text: 'Hobbies & Interests', style: 'sectionHeader' });
-          content.push({ text: hobbiesList.join(', '), style: 'paragraph', margin: [0,0,0,10] });
+          content.push({ text: hobbiesList.join(', '), style: 'paragraph', margin: [0,0,0,5] });
         }
       }
 
@@ -177,24 +190,24 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         content: content,
         defaultStyle: {
           font: 'Roboto', 
-          fontSize: 10,
-          lineHeight: 1.3,
+          fontSize: 9.5, // Slightly reduced base font size
+          lineHeight: 1.25, // Reduced line height
         },
         styles: {
-          name: { fontSize: 22, bold: true, margin: [0, 0, 0, 2] },
-          title: { fontSize: 14, color: 'gray', margin: [0, 0, 0, 5] },
-          contactLine: { fontSize: 9, color: '#444444' },
-          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] }, // No extra margin for separator itself
-          sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 3], decoration: 'underline' },
-          itemTitle: { fontSize: 10, bold: true, margin: [0, 5, 0, 0] },
-          itemSubtitle: { fontSize: 9, italic: true, color: '#333333', margin: [0, 1, 0, 2] },
-          paragraph: { margin: [0, 0, 0, 5], alignment: 'justify' },
-          list: { margin: [15, 2, 0, 5] }, 
-          detailsText: { fontSize: 9, margin: [0, 1, 0, 2] },
-          technologies: { fontSize: 9, italic: true, color: '#555555', margin: [0,1,0,2]},
+          name: { fontSize: 20, bold: true, margin: [0, 0, 0, 1] }, // Reduced font size and bottom margin
+          title: { fontSize: 13, color: 'gray', margin: [0, 0, 0, 3] }, // Reduced bottom margin
+          contactLine: { fontSize: 8.5, color: '#444444' }, // Reduced font size
+          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] },
+          sectionHeader: { fontSize: 11, bold: true, margin: [0, 6, 0, 2], decoration: 'underline' }, // Reduced top/bottom margin
+          itemTitle: { fontSize: 9.5, bold: true, margin: [0, 2, 0, 0] }, // Reduced top margin
+          itemSubtitle: { fontSize: 8.5, italic: true, color: '#333333', margin: [0, 0, 0, 1] }, // Reduced bottom margin
+          paragraph: { margin: [0, 0, 0, 3], alignment: 'justify' }, // Reduced bottom margin
+          list: { margin: [12, 1, 0, 3], lineHeight: 1.1 }, // Reduced left/bottom margin, reduced line height for lists
+          detailsText: { fontSize: 8.5, margin: [0, 0, 0, 1] }, // Reduced bottom margin
+          technologies: { fontSize: 8.5, italic: true, color: '#555555', margin: [0,0,0,1]},
           link: { color: 'blue', decoration: 'underline' }
         },
-        pageMargins: [ 40, 50, 40, 50 ], 
+        pageMargins: [ 40, 30, 40, 30 ], // Reduced top/bottom page margins
       };
 
       pdfMake.createPdf(documentDefinition).download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`);
