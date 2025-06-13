@@ -5,6 +5,7 @@ import type { ResumeData } from '@/lib/types';
 import { ResumeHtmlTemplate } from '@/components/pdf/ResumeHtmlTemplate';
 import puppeteer from 'puppeteer';
 import ReactDOMServer from 'react-dom/server';
+import React from 'react';
 
 interface GeneratePdfResult {
   success: boolean;
@@ -17,7 +18,7 @@ export async function generatePdfAction(resumeData: ResumeData): Promise<Generat
   const fileName = `${resumeData.personalInfo.name || 'Resume'}-ResuMatic.pdf`;
   try {
     const htmlContent = ReactDOMServer.renderToStaticMarkup(
-      <ResumeHtmlTemplate data={resumeData} />
+      React.createElement(ResumeHtmlTemplate, { data: resumeData })
     );
 
     // Launch Puppeteer.
