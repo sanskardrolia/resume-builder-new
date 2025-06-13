@@ -4,24 +4,35 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState, useRef } from 'react'; // Removed useEffect as client state is no longer used
+import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { HtmlResumePreview } from './HtmlResumePreview'; // For visual preview only
+import { HtmlResumePreview } from './HtmlResumePreview';
 
 // Import pdfmake
 import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
+// Import the VFS fonts using a named import strategy based on type definitions
+import { pdfMake as pdfMakeWithFonts } from "pdfmake/build/vfs_fonts";
 
-// Assign vfs to pdfMake. The @types/pdfmake suggest that pdfFonts (the import from vfs_fonts)
-// is an object with a .vfs property directly.
-if (pdfFonts && (pdfFonts as any).vfs) {
-  pdfMake.vfs = (pdfFonts as any).vfs;
-} else if (pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) {
-  // Fallback to the older structure just in case, though types suggest the above.
-  pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
+// Initialize pdfMake's VFS
+if (pdfMakeWithFonts && pdfMakeWithFonts.vfs) {
+  pdfMake.vfs = pdfMakeWithFonts.vfs;
 } else {
-  console.error("Could not load pdfmake vfs fonts. PDF generation might fail or use default fonts.");
+  // Fallback or error if the named import structure isn't as expected
+  // This might happen if the actual export is a default containing pdfMake property
+  // For now, log an error if the primary method fails.
+  console.error("Could not load pdfmake vfs fonts using named import. Trying default import structure. PDF generation might fail or use default fonts.");
+  // Attempting to load from a default import if `pdfMakeWithFonts` itself is the module structure.
+  // This is less likely if the named import is correct according to types.
+  // import pdfFontsDefault from "pdfmake/build/vfs_fonts"; // This would be a dynamic or conditional import, complex here.
+  // if (pdfFontsDefault && (pdfFontsDefault as any).pdfMake && (pdfFontsDefault as any).pdfMake.vfs) {
+  //   pdfMake.vfs = (pdfFontsDefault as any).pdfMake.vfs;
+  // } else if (pdfFontsDefault && (pdfFontsDefault as any).vfs) {
+  //   pdfMake.vfs = (pdfFontsDefault as any).vfs;
+  // } else {
+  //    console.error("Failed to load VFS through default import fallback as well.");
+  // }
 }
+
 
 // pdfMake uses Roboto font by default. For other fonts, .ttf files and custom configuration are needed.
 // The font selected in PersonalInfoForm will affect HtmlResumePreview, but the PDF will use Roboto.
@@ -50,7 +61,6 @@ const ensureUrl = (url: string) => {
 export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  // printRef is for HtmlResumePreview, not directly used by pdfMake
   const printRef = useRef<HTMLDivElement>(null); 
 
   const handleDownloadPdf = async () => {
@@ -148,17 +158,11 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           const credDetails: string[] = [];
           if (cert.credentialId) credDetails.push(`ID: ${cert.credentialId}`);
           if (cert.credentialUrl) {
-            // pdfmake link syntax is a bit different for text parts.
-            // We'll just list it, or make the ID the link if only URL is present.
-            // For simplicity, just listing. A more complex setup could make parts of text links.
-            credDetails.push(`Verify: ${cert.credentialUrl}`); // User can copy-paste this.
-            // For a clickable link for the URL itself:
-            // content.push({ text: 'Verify Credential', link: ensureUrl(cert.credentialUrl), style: 'link', margin: [0,0,0,8]});
+            credDetails.push(`Verify: ${cert.credentialUrl}`);
           }
            if (credDetails.length > 0) {
             content.push({ text: credDetails.join(' | '), style: 'detailsText', margin: [0,0,0,8] });
           } else {
-            // Add margin if no credDetails
             content.push({text: '', margin: [0,0,0,8]})
           }
         });
@@ -176,7 +180,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       const documentDefinition = {
         content: content,
         defaultStyle: {
-          font: 'Roboto', // pdfmake default. Custom fonts need more setup.
+          font: 'Roboto', 
           fontSize: 10,
           lineHeight: 1.3,
         },
@@ -187,12 +191,12 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           itemTitle: { fontSize: 10, bold: true, margin: [0, 5, 0, 0] },
           itemSubtitle: { fontSize: 9, italic: true, color: '#333333', margin: [0, 1, 0, 2] },
           paragraph: { margin: [0, 0, 0, 5], alignment: 'justify' },
-          list: { margin: [15, 2, 0, 5] }, // [left, top, right, bottom]
+          list: { margin: [15, 2, 0, 5] }, 
           detailsText: { fontSize: 9, margin: [0, 1, 0, 2] },
           technologies: { fontSize: 9, italic: true, color: '#555555', margin: [0,1,0,2]},
           link: { color: 'blue', decoration: 'underline' }
         },
-        pageMargins: [ 40, 50, 40, 50 ], // [left, top, right, bottom]
+        pageMargins: [ 40, 50, 40, 50 ], 
       };
 
       pdfMake.createPdf(documentDefinition).download(`${personalInfo.name || 'Resume'}-ResuMatic.pdf`);
@@ -237,7 +241,6 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       <div 
         className="overflow-auto flex-grow w-full h-[calc(100%-4rem)] border rounded-md bg-white p-2"
       >
-        {/* This HtmlResumePreview is for visual aid only, pdfMake generates from documentDefinition */}
         <div ref={printRef} className="w-full"> 
           <HtmlResumePreview data={resumeData} />
         </div>
