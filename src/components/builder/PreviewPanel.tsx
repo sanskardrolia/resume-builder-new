@@ -4,9 +4,11 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState } from 'react';
-import { generatePdfAction } from '@/app/actions/generate-pdf.action';
+import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { HtmlResumePreview } from './HtmlResumePreview'; // New component for HTML preview
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -15,41 +17,69 @@ interface PreviewPanelProps {
 export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const printRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPdf = async () => {
-    setIsLoading(true);
-    try {
-      const result = await generatePdfAction(resumeData);
-      if (result.success && result.pdfBase64) {
-        const byteCharacters = atob(result.pdfBase64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = result.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        toast({
-          title: "PDF Generated",
-          description: "Your resume PDF has been downloaded.",
-        });
-      } else {
-        throw new Error(result.error || 'Failed to generate PDF.');
-      }
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
+    if (!printRef.current) {
       toast({
         title: "Error Generating PDF",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description: "Preview content not found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const element = printRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2, // Increase scale for better resolution
+        useCORS: true, // If you have external images
+        logging: false,
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Calculate dimensions for PDF
+      // A4 dimensions: 210mm x 297mm. jsPDF uses points (1pt = 1/72 inch, 1 inch = 25.4mm)
+      // A4 width in points: 210 / 25.4 * 72 = 595.27
+      // A4 height in points: 297 / 25.4 * 72 = 841.89
+      const pdfWidth = 595.27; 
+      const pdfHeight = 841.89;
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      
+      const effectiveImgWidth = imgWidth * ratio;
+      const effectiveImgHeight = imgHeight * ratio;
+
+      // Center the image on the PDF page (optional)
+      const xOffset = (pdfWidth - effectiveImgWidth) / 2;
+      const yOffset = (pdfHeight - effectiveImgHeight) / 2;
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'a4',
+      });
+      
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, effectiveImgWidth, effectiveImgHeight);
+      
+      const fileName = `${resumeData.personalInfo.name || 'Resume'}-ResuMatic.pdf`;
+      pdf.save(fileName);
+
+      toast({
+        title: "PDF Generated",
+        description: "Your resume PDF has been downloaded.",
+      });
+
+    } catch (error) {
+      console.error("Error generating PDF with html2canvas/jsPDF:", error);
+      toast({
+        title: "Error Generating PDF",
+        description: error instanceof Error ? error.message : "An unknown error occurred while generating the PDF.",
         variant: "destructive",
       });
     } finally {
@@ -77,12 +107,13 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           {isLoading ? 'Generating PDF...' : 'Download PDF'}
         </Button>
       </div>
-      <div className="overflow-auto flex-grow w-full h-[calc(100%-4rem)] border rounded-md bg-white flex items-center justify-center text-muted-foreground p-4 text-center">
-        <p>
-          The PDF preview is no longer live. <br/> 
-          Click the "Download PDF" button to generate and view your resume. <br/>
-          Server-side rendering with Puppeteer is now used for higher fidelity PDF output.
-        </p>
+      <div 
+        className="overflow-auto flex-grow w-full h-[calc(100%-4rem)] border rounded-md bg-white p-2"
+        // Ensure this container has a defined size for html2canvas
+      >
+        <div ref={printRef} className="w-full"> {/* This inner div will be captured */}
+          <HtmlResumePreview data={resumeData} />
+        </div>
       </div>
     </div>
   );
