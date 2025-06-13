@@ -14,12 +14,12 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b matte-glass-surface">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-headline text-2xl font-semibold">
-          <FileText className="h-7 w-7 text-primary" />
-          <span>ResuMatic</span>
+        <Link href="/" className="flex items-center gap-2 font-headline text-2xl font-semibold text-foreground">
+          <FileText className="h-7 w-7" /> {/* Removed text-primary */}
+          <span>Fresher Resume Builder</span> {/* Changed name */}
         </Link>
         <nav className="flex items-center gap-2"> {/* Reduced gap for tighter packing */}
-          <Button variant={pathname === '/' ? "default" : "ghost"} asChild size="sm">
+          <Button variant={pathname === '/' ? "secondary" : "ghost"} asChild size="sm"> {/* Changed active variant to secondary */}
             <Link href="/">Home</Link>
           </Button>
           <Button variant={pathname === '/builder' ? "default" : "ghost"} asChild size="sm">

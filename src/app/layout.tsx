@@ -6,8 +6,8 @@ import { AppHeader } from '@/components/shared/AppHeader';
 import { ThemeProvider } from '@/context/ThemeContext'; // Import ThemeProvider
 
 export const metadata: Metadata = {
-  title: 'ResuMatic - Build Your Perfect Resume',
-  description: 'Create professional, ATS-friendly resumes with ease using ResuMatic.',
+  title: 'Fresher Resume Builder - Build Your Perfect Resume', // Changed name
+  description: 'Create professional, ATS-friendly resumes with ease using Fresher Resume Builder.', // Changed name
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
           </main>
           <Toaster />
           <footer className="py-6 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ResuMatic. All rights reserved.
+            Made with ❤️ by <a href="https://www.linkedin.com/in/sanskardrolia/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Sanskar Drolia</a>
           </footer>
         </ThemeProvider>
       </body>
