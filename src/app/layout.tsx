@@ -18,9 +18,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning> {/* Add suppressHydrationWarning here */}
       <head>
-        
-        
-        
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
         <ThemeProvider> {/* Wrap with ThemeProvider */}
