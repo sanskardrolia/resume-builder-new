@@ -8,18 +8,33 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
-import pdfMake from "pdfmake/build/pdfmake";
-// Import vfs_fonts for its side-effect. This expects vfs_fonts.js to attach 'vfs'
-// to the pdfMake instance imported above.
-import "pdfmake/build/vfs_fonts";
+// Import pdfmake and vfs_fonts as modules
+import * as PdfMakeModule from "pdfmake/build/pdfmake";
+import * as PdfFontsModule from "pdfmake/build/vfs_fonts";
 
-// Check if pdfMake.vfs was populated by the side-effect import.
-// This check runs once when the module is loaded on the client.
-if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) {
+// Resolve the actual pdfMake instance (handles CJS/ESM interop)
+const pdfMake = PdfMakeModule.default || PdfMakeModule;
+
+// Assign VFS from the imported fonts module
+// This relies on the typical structure where PdfFontsModule.pdfMake.vfs contains the font definitions.
+if (pdfMake && PdfFontsModule && PdfFontsModule.pdfMake && PdfFontsModule.pdfMake.vfs) {
+  pdfMake.vfs = PdfFontsModule.pdfMake.vfs;
+} else {
+  // This console.error is a safeguard during initialization if the structure is unexpected.
   console.error(
-    "CRITICAL: pdfMake.vfs was not populated or is empty after importing 'pdfmake/build/vfs_fonts'. " +
-    "PDF font embedding will not work. Ensure the vfs_fonts module correctly attaches to the pdfMake instance " +
-    "or that the pdfmake and vfs_fonts versions are compatible. Current pdfMake object:", pdfMake
+    "CRITICAL: Failed to initialize pdfMake.vfs during module load. pdfMake or PdfFontsModule structure is not as expected.",
+    "Resolved pdfMake instance:", pdfMake,
+    "PdfMakeModule:", PdfMakeModule,
+    "PdfFontsModule:", PdfFontsModule
+  );
+}
+
+// Post-initialization check.
+// This log helps confirm if vfs was successfully assigned.
+if (typeof pdfMake !== 'undefined' && pdfMake && (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0)) {
+  console.error(
+    "CRITICAL: pdfMake.vfs remains unpopulated after attempted assignment. PDF font embedding will likely fail.",
+    "Current pdfMake object:", pdfMake
   );
 }
 
@@ -67,13 +82,14 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         toast({ title: "Preview Loading", description: "Please wait a moment for the preview to initialize." });
         return;
     }
-    if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) { 
+    // Check if pdfMake itself is available and if vfs is populated
+    if (!pdfMake || typeof pdfMake.createPdf !== 'function' || !pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) { 
       toast({
-        title: "Font Error",
-        description: "PDF fonts (vfs_fonts) are not loaded correctly. PDF cannot be generated with embedded fonts.",
+        title: "PDF Generation Error",
+        description: "pdfMake library or its fonts (vfs_fonts) are not loaded correctly. PDF cannot be generated.",
         variant: "destructive",
       });
-      console.error("pdfMake.vfs is not set or is empty. PDF generation aborted. Check console for earlier critical errors.");
+      console.error("pdfMake.createPdf is not a function or pdfMake.vfs is not set/empty. PDF generation aborted. Check console for earlier critical errors during module load.", "pdfMake:", pdfMake);
       return;
     }
 
@@ -283,4 +299,5 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       </p>
     </div>
   );
-}
+
+    
