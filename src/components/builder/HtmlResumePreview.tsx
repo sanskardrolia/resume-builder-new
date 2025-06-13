@@ -16,6 +16,14 @@ const formatDateRange = (startDate?: string, endDate?: string) => {
   return `${start} - ${end}`;
 };
 
+const ensureFullUrl = (urlInput: string) => {
+  if (!urlInput) return '';
+  if (urlInput.startsWith('http://') || urlInput.startsWith('https://')) {
+    return urlInput;
+  }
+  return `https://${urlInput}`;
+};
+
 export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
   const { personalInfo, education, workExperience, projects, certifications, hobbies } = data;
 
@@ -24,8 +32,6 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
   const baseFontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
   const selectedFontFamily = personalInfo.fontFamily || baseFontFamily;
 
-  // Styles for the HTML preview. These will be captured by html2canvas.
-  // It's crucial these styles are self-contained or globally applied if not inline.
   const styles = `
     .resume-preview-container { font-family: ${selectedFontFamily}; font-size: 10pt; line-height: 1.4; color: #333; background-color: white; padding: 30px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     .headerSection { text-align: center; margin-bottom: 20px; }
@@ -54,7 +60,7 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
     <>
       <style>{styles}</style>
       <div className="resume-preview-container">
-        {(personalInfo.name || personalInfo.title || personalInfo.email || personalInfo.phone || personalInfo.linkedin) && (
+        {(personalInfo.name || personalInfo.title || personalInfo.email || personalInfo.phone || personalInfo.linkedin || personalInfo.github || personalInfo.portfolioUrl) && (
           <div className="headerSection">
             {personalInfo.name && <div className="name">{personalInfo.name}</div>}
             {personalInfo.title && <div className="title">{personalInfo.title}</div>}
@@ -63,7 +69,17 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
               {personalInfo.phone && <span className="contactText">| {personalInfo.phone}</span>}
               {personalInfo.linkedin && (
                 <span className="contactText">
-                  | <a href={personalInfo.linkedin.startsWith('http') ? personalInfo.linkedin : `https://${personalInfo.linkedin}`} className="contactLink" target="_blank" rel="noopener noreferrer">{personalInfo.linkedin}</a>
+                  | <a href={ensureFullUrl(personalInfo.linkedin)} className="contactLink" target="_blank" rel="noopener noreferrer">{personalInfo.linkedin}</a>
+                </span>
+              )}
+              {personalInfo.github && (
+                <span className="contactText">
+                  | <a href={`https://github.com/${personalInfo.github}`} className="contactLink" target="_blank" rel="noopener noreferrer">github.com/{personalInfo.github}</a>
+                </span>
+              )}
+              {personalInfo.portfolioUrl && (
+                <span className="contactText">
+                  | <a href={ensureFullUrl(personalInfo.portfolioUrl)} className="contactLink" target="_blank" rel="noopener noreferrer">{personalInfo.portfolioUrl}</a>
                 </span>
               )}
             </div>
@@ -122,7 +138,7 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
               <div key={proj.id} className="entry">
                 <div className="entryHeader">
                   <span className="itemTitle">{proj.title}</span>
-                  {proj.link && <a href={proj.link.startsWith('http') ? proj.link : `https://${proj.link}`} style={{fontSize: '9pt'}} target="_blank" rel="noopener noreferrer">Link</a>}
+                  {proj.link && <a href={ensureFullUrl(proj.link)} style={{fontSize: '9pt'}} target="_blank" rel="noopener noreferrer">Link</a>}
                 </div>
                 <div className="detailsText">{proj.description}</div>
                 {proj.technologies && <div className="technologies"><strong>Technologies:</strong> {proj.technologies}</div>}
@@ -145,7 +161,7 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
                   <div className="detailsText">
                     {cert.credentialId && <span>ID: {cert.credentialId}</span>}
                     {cert.credentialId && cert.credentialUrl && <span> | </span>}
-                    {cert.credentialUrl && <a href={cert.credentialUrl.startsWith('http') ? cert.credentialUrl : `https://${cert.credentialUrl}`} target="_blank" rel="noopener noreferrer">Verify</a>}
+                    {cert.credentialUrl && <a href={ensureFullUrl(cert.credentialUrl)} target="_blank" rel="noopener noreferrer">Verify</a>}
                   </div>
                 )}
               </div>

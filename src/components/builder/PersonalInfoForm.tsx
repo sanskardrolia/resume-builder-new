@@ -51,6 +51,16 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
           <Input id="linkedin" value={data.linkedin} onChange={(e) => onChange('linkedin', e.target.value)} placeholder="e.g., linkedin.com/in/janedoe" />
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="github">GitHub Username</Label>
+            <Input id="github" value={data.github || ''} onChange={(e) => onChange('github', e.target.value)} placeholder="e.g., janedoe" />
+          </div>
+          <div>
+            <Label htmlFor="portfolioUrl">Personal Portfolio URL</Label>
+            <Input id="portfolioUrl" value={data.portfolioUrl || ''} onChange={(e) => onChange('portfolioUrl', e.target.value)} placeholder="e.g., https://janedoe.dev" />
+          </div>
+        </div>
         <div>
           <Label htmlFor="summary">Professional Summary</Label>
           <Textarea id="summary" value={data.summary} onChange={(e) => onChange('summary', e.target.value)} placeholder="A brief summary of your skills and experience..." rows={4} />

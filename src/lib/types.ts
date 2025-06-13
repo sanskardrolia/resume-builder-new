@@ -5,6 +5,8 @@ export interface PersonalInfo {
   email: string;
   phone: string;
   linkedin: string;
+  github?: string; // GitHub username
+  portfolioUrl?: string; // Full URL to personal portfolio
   summary: string;
   fontFamily: string; // Added for font selection
 }
@@ -60,6 +62,8 @@ export const initialResumeData: ResumeData = {
     email: '',
     phone: '',
     linkedin: '',
+    github: '',
+    portfolioUrl: '',
     summary: '',
     fontFamily: 'Arial, sans-serif', // Default font
   },
@@ -77,6 +81,8 @@ export const sampleResumeData: ResumeData = {
     email: 'john.sample@example.com',
     phone: '(555) 123-4567',
     linkedin: 'linkedin.com/in/johnbsample',
+    github: 'johnbsample',
+    portfolioUrl: 'https://johnbsample.dev',
     summary: "Highly skilled and creative Web Developer with 5+ years of experience in designing, developing, and launching responsive websites and web applications. Proficient in a wide range of modern technologies and frameworks. Passionate about creating intuitive user experiences and efficient back-end solutions.",
     fontFamily: 'Arial, sans-serif',
   },
