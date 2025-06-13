@@ -1,12 +1,15 @@
+
 "use client";
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { FileText } from 'lucide-react';
+import { FileText, Moon, Sun } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useTheme } from '@/context/ThemeContext'; // Import useTheme
 
 export function AppHeader() {
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b matte-glass-surface">
@@ -15,15 +18,20 @@ export function AppHeader() {
           <FileText className="h-7 w-7 text-primary" />
           <span>ResuMatic</span>
         </Link>
-        <nav className="flex items-center gap-4">
-          <Button variant={pathname === '/' ? "default" : "ghost"} asChild>
+        <nav className="flex items-center gap-2"> {/* Reduced gap for tighter packing */}
+          <Button variant={pathname === '/' ? "default" : "ghost"} asChild size="sm">
             <Link href="/">Home</Link>
           </Button>
-          <Button variant={pathname === '/builder' ? "default" : "ghost"} asChild>
+          <Button variant={pathname === '/builder' ? "default" : "ghost"} asChild size="sm">
             <Link href="/builder">Builder</Link>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
         </nav>
       </div>
     </header>
   );
 }
+
+    

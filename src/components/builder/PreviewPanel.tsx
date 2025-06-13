@@ -4,7 +4,7 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
@@ -14,6 +14,9 @@ import pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFontsAll from "pdfmake/build/vfs_fonts";
 
 // Assign VFS
+// Based on type definitions, pdfFontsAll from "pdfmake/build/vfs_fonts" should have a `pdfMake` property
+// which in turn has `vfs`.
+// { pdfMake: { vfs: { ... } } }
 if (pdfFontsAll && (pdfFontsAll as any).pdfMake && (pdfFontsAll as any).pdfMake.vfs) {
   pdfMake.vfs = (pdfFontsAll as any).pdfMake.vfs;
 } else if (pdfFontsAll && (pdfFontsAll as any).vfs) { // Fallback if the structure is { vfs: ... } directly
@@ -23,6 +26,8 @@ else {
   console.error("Could not load pdfmake vfs fonts. PDF generation might fail or use default fonts.");
 }
 
+// pdfMake uses Roboto font by default. For other fonts, .ttf files and custom configuration are needed.
+// The font selected in PersonalInfoForm will affect HtmlResumePreview, but the PDF will use Roboto.
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -52,7 +57,6 @@ const ensureFullUrl = (urlInput: string, isGithubUsername: boolean = false) => {
 export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const printRef = useRef<HTMLDivElement>(null); 
 
   const handleDownloadPdf = async () => {
     setIsLoading(true);
@@ -95,13 +99,13 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           text: contactDetailsForPdf,
           alignment: 'center',
           style: 'contactLine',
-          margin: [0, 0, 0, 5] // Reduced margin after contact line
+          margin: [0, 0, 0, 5] 
         });
       }
 
       if (personalInfo.summary) {
         content.push({ text: 'Summary', style: 'sectionHeader' });
-        content.push({ text: personalInfo.summary, style: 'paragraph', margin: [0, 0, 0, 5] }); // Reduced bottom margin
+        content.push({ text: personalInfo.summary, style: 'paragraph', margin: [0, 0, 0, 5] });
       }
 
       if (workExperience && workExperience.length > 0) {
@@ -113,7 +117,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             content.push({
               ul: exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line),
               style: 'list',
-              margin: [0, 1, 0, 4] // Reduced list item bottom margin
+              margin: [0, 1, 0, 4] 
             });
           }
         });
@@ -125,7 +129,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           content.push({ text: edu.degree, style: 'itemTitle' });
           content.push({ text: `${edu.institution} | ${formatDateRange(edu.startDate, edu.endDate)}`, style: 'itemSubtitle' });
           if (edu.details) {
-            content.push({ text: edu.details, style: 'detailsText', margin: [0, 1, 0, 4] }); // Reduced bottom margin
+            content.push({ text: edu.details, style: 'detailsText', margin: [0, 1, 0, 4] });
           }
         });
       }
@@ -141,14 +145,14 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       if (projects && projects.length > 0) {
         content.push({ text: 'Projects', style: 'sectionHeader' });
         projects.forEach(proj => {
-          const projectHeader: any[] = [{ text: proj.title, style: 'itemTitle' }];
+          const projectHeader: any[] = [{ text: proj.title, style: 'itemTitle', width: '*' }];
           if (proj.link) {
-            projectHeader.push({ text: 'Link', link: ensureFullUrl(proj.link), style: 'link', margin: [5,0,0,0]});
+            projectHeader.push({ text: 'Link', link: ensureFullUrl(proj.link), style: 'link', alignment: 'right', width: 'auto' });
           }
           content.push({ columns: projectHeader });
           content.push({ text: proj.description, style: 'detailsText', margin: [0,1,0,0] });
           if (proj.technologies) {
-            content.push({ text: `Technologies: ${proj.technologies}`, style: 'technologies', margin: [0,0,0,4] }); // Reduced bottom margin
+            content.push({ text: `Technologies: ${proj.technologies}`, style: 'technologies', margin: [0,0,0,4] });
           }
         });
       }
@@ -156,9 +160,9 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       if (certifications && certifications.length > 0) {
         content.push({ text: 'Certifications', style: 'sectionHeader' });
         certifications.forEach(cert => {
-          const certLine: any[] = [{ text: cert.name, style: 'itemTitle' }];
+          const certLine: any[] = [{ text: cert.name, style: 'itemTitle', width: '*' }];
            if (cert.dateEarned) {
-            certLine.push({ text: cert.dateEarned, alignment: 'right' });
+            certLine.push({ text: cert.dateEarned, alignment: 'right', width: 'auto' });
           }
           content.push({ columns: certLine });
           content.push({ text: cert.issuingOrganization, style: 'itemSubtitle' });
@@ -170,9 +174,8 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             credDetailsArray.push({ text: 'Verify', link: ensureFullUrl(cert.credentialUrl), style: 'link' });
           }
            if (credDetailsArray.length > 0) {
-            content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] }); // Reduced bottom margin
+            content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] });
           } else {
-             // Ensure consistent spacing even if no cred details
             content.push({text: '', margin: [0,0,0, cert === certifications[certifications.length -1] ? 0 : 2]});
           }
         });
@@ -190,24 +193,24 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         content: content,
         defaultStyle: {
           font: 'Roboto', 
-          fontSize: 9.5, // Slightly reduced base font size
-          lineHeight: 1.25, // Reduced line height
+          fontSize: 9, 
+          lineHeight: 1.2, 
         },
         styles: {
-          name: { fontSize: 20, bold: true, margin: [0, 0, 0, 1] }, // Reduced font size and bottom margin
-          title: { fontSize: 13, color: 'gray', margin: [0, 0, 0, 3] }, // Reduced bottom margin
-          contactLine: { fontSize: 8.5, color: '#444444' }, // Reduced font size
+          name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] }, 
+          title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] }, 
+          contactLine: { fontSize: 8, color: '#444444' }, 
           contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] },
-          sectionHeader: { fontSize: 11, bold: true, margin: [0, 6, 0, 2], decoration: 'underline' }, // Reduced top/bottom margin
-          itemTitle: { fontSize: 9.5, bold: true, margin: [0, 2, 0, 0] }, // Reduced top margin
-          itemSubtitle: { fontSize: 8.5, italic: true, color: '#333333', margin: [0, 0, 0, 1] }, // Reduced bottom margin
-          paragraph: { margin: [0, 0, 0, 3], alignment: 'justify' }, // Reduced bottom margin
-          list: { margin: [12, 1, 0, 3], lineHeight: 1.1 }, // Reduced left/bottom margin, reduced line height for lists
-          detailsText: { fontSize: 8.5, margin: [0, 0, 0, 1] }, // Reduced bottom margin
-          technologies: { fontSize: 8.5, italic: true, color: '#555555', margin: [0,0,0,1]},
-          link: { color: 'blue', decoration: 'underline' }
+          sectionHeader: { fontSize: 10, bold: true, margin: [0, 5, 0, 2], decoration: 'underline' }, 
+          itemTitle: { fontSize: 9, bold: true, margin: [0, 2, 0, 0] }, 
+          itemSubtitle: { fontSize: 8, italic: true, color: '#333333', margin: [0, 0, 0, 1] }, 
+          paragraph: { margin: [0, 0, 0, 3], alignment: 'justify' }, 
+          list: { margin: [10, 1, 0, 3], lineHeight: 1.1 }, 
+          detailsText: { fontSize: 8, margin: [0, 0, 0, 1] }, 
+          technologies: { fontSize: 8, italic: true, color: '#555555', margin: [0,0,0,1]},
+          link: { color: 'blue', decoration: 'underline', fontSize: 8 }
         },
-        pageMargins: [ 40, 30, 40, 30 ], // Reduced top/bottom page margins
+        pageMargins: [ 30, 20, 30, 20 ], 
       };
 
       pdfMake.createPdf(documentDefinition).download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`);
@@ -234,7 +237,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       <div className="w-full flex justify-between items-center mb-4">
         <h2 className="font-headline text-2xl font-semibold flex items-center gap-2">
           <Eye className="w-6 h-6 text-primary" />
-          Preview & Download
+          HTML Preview
         </h2>
         <Button 
           className="font-headline" 
@@ -250,16 +253,18 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         </Button>
       </div>
       <div 
-        className="overflow-auto flex-grow w-full h-[calc(100%-4rem)] border rounded-md bg-white p-2"
+        className="overflow-auto flex-grow w-full h-[calc(100%-6rem)] border rounded-md bg-white p-2 shadow-inner"
       >
-        <div ref={printRef} className="w-full"> 
+        <div className="w-full"> 
           <HtmlResumePreview data={resumeData} />
         </div>
       </div>
-      <p className="text-xs text-muted-foreground mt-2">
+      <p className="text-xs text-muted-foreground mt-2 text-center">
         Note: The PDF is generated programmatically with pdfMake and uses 'Roboto' font by default. 
         The preview above shows HTML rendering which may differ slightly, especially with custom fonts.
       </p>
     </div>
   );
 }
+
+    
