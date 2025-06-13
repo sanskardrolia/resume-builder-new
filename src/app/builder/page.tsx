@@ -5,9 +5,22 @@ import React, { useState } from 'react';
 import type { ResumeData } from '@/lib/types';
 import { initialResumeData } from '@/lib/types';
 import { EditorPanel } from '@/components/builder/EditorPanel';
-import { PreviewPanel } from '@/components/builder/PreviewPanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useIsMobile } from '@/hooks/use-mobile'; // Import the hook
+import dynamic from 'next/dynamic'; // Import dynamic
+
+// Dynamically import PreviewPanel
+const PreviewPanel = dynamic(
+  () => import('@/components/builder/PreviewPanel').then(mod => mod.PreviewPanel),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-6 bg-muted/30 h-full flex flex-col items-center justify-center">
+        <p>Loading Preview...</p>
+      </div>
+    ),
+  }
+);
 
 export default function BuilderPage() {
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData);
