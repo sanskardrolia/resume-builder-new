@@ -1,7 +1,11 @@
+
 "use client";
 
 import type { ResumeData } from '@/lib/types';
+import { sampleResumeData } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from '@/components/ui/button';
+import { Wand2 } from 'lucide-react';
 import { PersonalInfoForm } from './PersonalInfoForm';
 import { EducationForm } from './EducationForm';
 import { WorkExperienceForm } from './WorkExperienceForm';
@@ -34,9 +38,21 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
     setResumeData(prev => ({ ...prev, hobbies: value }));
   };
 
+  const loadSampleData = () => {
+    // Deep copy sample data to avoid direct mutation issues if any part of the sample data object is shared or complex
+    const deepCopiedSampleData = JSON.parse(JSON.stringify(sampleResumeData));
+    setResumeData(deepCopiedSampleData);
+  };
+
   return (
     <div className="p-6 space-y-6 overflow-y-auto h-full">
-      <h2 className="font-headline text-2xl font-semibold text-center md:text-left">Edit Your Resume</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 sm:gap-0">
+        <h2 className="font-headline text-2xl font-semibold text-center md:text-left">Edit Your Resume</h2>
+        <Button onClick={loadSampleData} variant="outline" size="sm">
+          <Wand2 className="w-4 h-4 mr-2" />
+          Load Sample Data
+        </Button>
+      </div>
       <Accordion type="multiple" defaultValue={['personal-info']} className="w-full">
         <AccordionItem value="personal-info">
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Personal Information</AccordionTrigger>
