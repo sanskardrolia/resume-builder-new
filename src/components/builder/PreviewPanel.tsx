@@ -9,8 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
 // Attempt to import pdfmake with explicit .js extensions
-// Log the PdfMakeModule to see its actual structure.
 import * as PdfMakeModule from "pdfmake/build/pdfmake.js";
+
+// Import vfs_fonts for its side effects AFTER PdfMakeModule is imported
+import "pdfmake/build/vfs_fonts.js";
 
 console.log("Raw PdfMakeModule import:", PdfMakeModule);
 
@@ -33,7 +35,20 @@ const pdfMake = pdfMakeInstance;
 console.log("Resolved pdfMake instance for component use:", pdfMake);
 console.log("Typeof resolved pdfMake instance:", typeof pdfMake);
 
-// pdfMake.vfs related imports and checks are removed.
+// Check if pdfMake.vfs was populated by the side-effect import of vfs_fonts.js
+// This check runs once when the module is loaded on the client.
+if (pdfMake && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
+  console.log("pdfMake.vfs successfully populated after side-effect import of vfs_fonts.js");
+} else {
+  console.error(
+    "CRITICAL: pdfMake.vfs was not populated or is empty after side-effect import of 'pdfmake/build/vfs_fonts'. " +
+    "PDF font embedding will not work if custom fonts were intended. Ensure the vfs_fonts module correctly attaches to the pdfMake instance " +
+    "or that the pdfmake and vfs_fonts versions are compatible.",
+    "Current pdfMake object:", pdfMake,
+    "Current pdfMake.vfs:", (pdfMake && typeof pdfMake === 'object' && pdfMake.vfs) ? pdfMake.vfs : "N/A (pdfMake itself might be undefined or not an object)"
+  );
+}
+
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -219,18 +234,11 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       const documentDefinition = {
         content: content,
         defaultStyle: {
-          font: 'Helvetica', 
+          // Font removed, pdfMake will use its internal default
           fontSize: 9,
           lineHeight: 1.2,
         },
-        fonts: { 
-            Helvetica: {
-                normal: 'Helvetica',
-                bold: 'Helvetica-Bold',
-                italics: 'Helvetica-Oblique',
-                bolditalics: 'Helvetica-BoldOblique'
-            }
-        },
+        // Removed explicit fonts section
         styles: {
           name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] as [number,number,number,number] },
           title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] as [number,number,number,number] },
@@ -248,7 +256,6 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         pageMargins: [ 30, 20, 30, 20 ] as [number,number,number,number],
       };
       
-      // Improved error catching for pdfMake operations
       try {
         const pdfDocGenerator = pdfMake.createPdf(documentDefinition);
         pdfDocGenerator.download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-FresherResumeBuilder.pdf`);
@@ -267,7 +274,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         });
       }
 
-    } catch (error) { // This outer catch is for errors in data processing before pdfMake
+    } catch (error) { 
       console.error("Error preparing document definition for pdfMake:", error);
       toast({
         title: "Error Preparing PDF",
@@ -307,10 +314,12 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated programmatically and uses standard fonts (e.g., Helvetica).
+        Note: The PDF is generated programmatically and uses standard fonts.
         The HTML preview above may differ slightly from the PDF.
       </p>
     </div>
   );
 }
+    
+
     
