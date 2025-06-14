@@ -219,7 +219,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       const documentDefinition = {
         content: content,
         defaultStyle: {
-          // font: 'Roboto', // Removed: pdfMake will use its internal default font
+          font: 'Helvetica', // Explicitly set to a standard PDF font
           fontSize: 9,
           lineHeight: 1.2,
         },
