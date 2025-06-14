@@ -11,15 +11,23 @@ import { EducationForm } from './EducationForm';
 import { WorkExperienceForm } from './WorkExperienceForm';
 import { ProjectsForm } from './ProjectsForm';
 import { CertificationsForm } from './CertificationsForm';
-import { SkillsForm } from './SkillsForm'; // Added import
+import { SkillsForm } from './SkillsForm';
 import { HobbiesForm } from './HobbiesForm';
+import { FontSizeControl } from './FontSizeControl'; // Added import
 
 interface EditorPanelProps {
   resumeData: ResumeData;
   setResumeData: React.Dispatch<React.SetStateAction<ResumeData>>;
+  fontSizeMultiplier: number; // Added prop
+  onFontSizeMultiplierChange: (multiplier: number) => void; // Added prop
 }
 
-export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
+export function EditorPanel({ 
+  resumeData, 
+  setResumeData,
+  fontSizeMultiplier, // Destructure prop
+  onFontSizeMultiplierChange // Destructure prop
+}: EditorPanelProps) {
   const handlePersonalInfoChange = (field: keyof ResumeData['personalInfo'], value: string) => {
     setResumeData(prev => ({ ...prev, personalInfo: { ...prev.personalInfo, [field]: value } }));
   };
@@ -40,7 +48,7 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
     setResumeData(prev => ({ ...prev, certifications: updatedEntries }));
   };
 
-  const handleSkillsChange = (value: string) => { // Added handler
+  const handleSkillsChange = (value: string) => { 
     setResumeData(prev => ({ ...prev, skills: value }));
   };
 
@@ -69,6 +77,15 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
             <PersonalInfoForm data={resumeData.personalInfo} onChange={handlePersonalInfoChange} />
           </AccordionContent>
         </AccordionItem>
+        <AccordionItem value="font-size">
+          <AccordionTrigger className="font-headline text-lg hover:no-underline">Appearance</AccordionTrigger>
+          <AccordionContent>
+            <FontSizeControl 
+              currentMultiplier={fontSizeMultiplier}
+              onMultiplierChange={onFontSizeMultiplierChange}
+            />
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="education">
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Education</AccordionTrigger>
           <AccordionContent>
@@ -81,7 +98,7 @@ export function EditorPanel({ resumeData, setResumeData }: EditorPanelProps) {
             <WorkExperienceForm data={resumeData.workExperience} onChange={handleWorkExperienceChange} />
           </AccordionContent>
         </AccordionItem>
-         <AccordionItem value="skills"> {/* Added Skills Accordion Item */}
+         <AccordionItem value="skills">
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Skills</AccordionTrigger>
           <AccordionContent>
             <SkillsForm data={resumeData.skills} onChange={handleSkillsChange} />

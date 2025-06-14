@@ -6,6 +6,7 @@ import React from 'react';
 
 interface HtmlResumePreviewProps {
   data: ResumeData;
+  fontSizeMultiplier: number; // Added prop
 }
 
 // Helper to format dates
@@ -24,38 +25,62 @@ const ensureFullUrl = (urlInput: string) => {
   return `https://${urlInput}`;
 };
 
-export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
+// Base font sizes in points (pt)
+const baseHtmlFontSizes = {
+  container: 10,
+  name: 22,
+  title: 13,
+  contactInfo: 9,
+  sectionTitle: 11,
+  paragraph: 9.5,
+  itemTitle: 10,
+  itemSubTitle: 9,
+  itemDates: 9,
+  listItem: 9.5,
+  detailsText: 9,
+  technologies: 9,
+  skillsText: 9.5,
+  hobbiesText: 9.5,
+  projectLink: 9,
+};
+
+export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePreviewProps) {
   const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
 
   const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
   const hobbiesList = hobbies?.split(/[\n,]+/).map(h => h.trim()).filter(Boolean) || [];
 
   const baseFontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
-  // Removed selectedFontFamily as font selection is removed. Always use baseFontFamily.
+
+  // Scale font sizes
+  const s = (key: keyof typeof baseHtmlFontSizes) => {
+    return (baseHtmlFontSizes[key] * fontSizeMultiplier).toFixed(2); // Keep 2 decimal places for pt
+  };
 
   const styles = `
-    .resume-preview-container { font-family: ${baseFontFamily}; font-size: 10pt; line-height: 1.35; color: #333; background-color: white; padding: 25px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .resume-preview-container { font-family: ${baseFontFamily}; font-size: ${s('container')}pt; line-height: 1.35; color: #333; background-color: white; padding: 25px; max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     .headerSection { text-align: center; margin-bottom: 15px; }
-    .name { font-size: 22pt; font-weight: bold; margin-bottom: 1px; }
-    .title { font-size: 13pt; color: #555; margin-bottom: 4px; }
-    .contactInfo { display: flex; justify-content: center; flex-wrap: wrap; font-size: 9pt; color: #444; margin-bottom: 10px; }
+    .name { font-size: ${s('name')}pt; font-weight: bold; margin-bottom: 1px; }
+    .title { font-size: ${s('title')}pt; color: #555; margin-bottom: 4px; }
+    .contactInfo { display: flex; justify-content: center; flex-wrap: wrap; font-size: ${s('contactInfo')}pt; color: #444; margin-bottom: 10px; }
     .contactText { margin: 0 4px; }
     .contactLink { color: #007bff; text-decoration: none; }
     .section { margin-bottom: 12px; }
-    .sectionTitle { font-size: 11pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 2px; margin-bottom: 6px; }
-    .paragraph { font-size: 9.5pt; text-align: justify; white-space: pre-wrap; margin-bottom: 8px; }
+    .sectionTitle { font-size: ${s('sectionTitle')}pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 2px; margin-bottom: 6px; }
+    .paragraph { font-size: ${s('paragraph')}pt; text-align: justify; white-space: pre-wrap; margin-bottom: 8px; }
     .entry { margin-bottom: 8px; }
     .entryHeader { display: flex; justify-content: space-between; align-items: baseline; }
-    .itemTitle { font-size: 10pt; font-weight: bold; }
-    .itemSubTitle { font-size: 9pt; font-style: italic; color: #555; margin-bottom: 1px; }
-    .itemDates { font-size: 9pt; color: #555; white-space: nowrap; }
+    .itemTitle { font-size: ${s('itemTitle')}pt; font-weight: bold; }
+    .itemSubTitle { font-size: ${s('itemSubTitle')}pt; font-style: italic; color: #555; margin-bottom: 1px; }
+    .itemDates { font-size: ${s('itemDates')}pt; color: #555; white-space: nowrap; }
     .list { margin: 0; padding-left: 18px; }
-    .listItem { font-size: 9.5pt; margin-bottom: 1px; }
-    .detailsText { font-size: 9pt; margin-top: 1px; white-space: pre-wrap; }
-    .technologies { font-size: 9pt; margin-top: 1px; }
-    .skillsText { font-size: 9.5pt; }
-    .hobbiesText { font-size: 9.5pt; }
+    .listItem { font-size: ${s('listItem')}pt; margin-bottom: 1px; }
+    .detailsText { font-size: ${s('detailsText')}pt; margin-top: 1px; white-space: pre-wrap; }
+    .technologies { font-size: ${s('technologies')}pt; margin-top: 1px; }
+    .skillsText { font-size: ${s('skillsText')}pt; }
+    .hobbiesText { font-size: ${s('hobbiesText')}pt; }
     a { color: #007bff; text-decoration: none; }
+    .projectLinkStyle { font-size: ${s('projectLink')}pt; }
   `;
 
   return (
@@ -107,7 +132,7 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
                 <div className="itemSubTitle">{exp.company}</div>
                 {exp.responsibilities && (
                   <ul className="list">
-                    {exp.responsibilities.split('\n').map((line, idx) => (
+                    {exp.responsibilities.split('\\n').map((line, idx) => (
                       line.trim() ? <li key={idx} className="listItem">{line.trim()}</li> : null
                     )).filter(Boolean)}
                   </ul>
@@ -147,7 +172,7 @@ export function HtmlResumePreview({ data }: HtmlResumePreviewProps) {
               <div key={proj.id} className="entry">
                 <div className="entryHeader">
                   <span className="itemTitle">{proj.title}</span>
-                  {proj.link && <a href={ensureFullUrl(proj.link)} style={{fontSize: '9pt'}} target="_blank" rel="noopener noreferrer">Link</a>}
+                  {proj.link && <a href={ensureFullUrl(proj.link)} className="projectLinkStyle" target="_blank" rel="noopener noreferrer">Link</a>}
                 </div>
                 <div className="detailsText">{proj.description}</div>
                 {proj.technologies && <div className="technologies"><strong>Technologies:</strong> {proj.technologies}</div>}
