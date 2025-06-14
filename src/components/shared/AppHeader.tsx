@@ -22,7 +22,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-headline text-2xl font-semibold text-foreground">
           <FileText className="h-7 w-7" />
-          <span>Fresher Resume Builder</span>
+          <span>ResumMatic</span>
         </Link>
         <nav className="flex items-center gap-2">
           <Button variant="ghost" asChild size="sm">
