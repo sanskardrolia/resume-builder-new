@@ -13,7 +13,7 @@ export default function HomePage() {
           Craft Your Future: Build a Resume That Opens Doors.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-          Fresher Resume Builder helps you create professional, ATS-friendly resumes with ease.
+          Fresher Resume Builder helps you create professional and ATS-friendly resumes with ease.
           Stop worrying about formatting and start focusing on landing your dream job.
         </p>
         <Button size="lg" asChild className="font-headline">
