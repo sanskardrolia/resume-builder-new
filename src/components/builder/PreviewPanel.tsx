@@ -275,7 +275,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         
         toast({
           title: "PDF Generated",
-          description: "Your resume PDF has been downloaded.",
+          description: "Your resume PDF has been downloaded. Please check your download tab",
         });
 
       } catch (pdfError) {
