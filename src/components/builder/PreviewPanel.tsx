@@ -79,10 +79,10 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
     if (!pdfMake || typeof pdfMake.createPdf !== 'function') { 
       toast({
         title: "PDF Generation Error",
-        description: "pdfMake library is not loaded correctly. PDF cannot be generated. Check console logs for details.",
+        description: "pdfMake library is not loaded correctly or createPdf function is missing. PDF cannot be generated. Check console logs for details.",
         variant: "destructive",
       });
-      console.error("PDF Generation Aborted: pdfMake.createPdf is not a function.", "pdfMake object:", pdfMake);
+      console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake is not loaded.", "pdfMake object:", pdfMake);
       return;
     }
 
@@ -223,6 +223,14 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
           fontSize: 9,
           lineHeight: 1.2,
         },
+        fonts: { // Define standard Helvetica variants
+            Helvetica: {
+                normal: 'Helvetica',
+                bold: 'Helvetica-Bold',
+                italics: 'Helvetica-Oblique',
+                bolditalics: 'Helvetica-BoldOblique'
+            }
+        },
         styles: {
           name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] },
           title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] },
@@ -287,7 +295,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated programmatically with pdfMake and will use its default built-in fonts.
+        Note: The PDF is generated programmatically with pdfMake and will use its default built-in fonts (e.g., Helvetica).
         The HTML preview above may differ slightly from the PDF.
       </p>
     </div>
