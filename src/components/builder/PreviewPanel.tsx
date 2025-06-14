@@ -219,11 +219,11 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       const documentDefinition = {
         content: content,
         defaultStyle: {
-          font: 'Helvetica', // Explicitly set to a standard PDF font
+          font: 'Helvetica', 
           fontSize: 9,
           lineHeight: 1.2,
         },
-        fonts: { // Define standard Helvetica variants
+        fonts: { 
             Helvetica: {
                 normal: 'Helvetica',
                 bold: 'Helvetica-Bold',
@@ -232,34 +232,46 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
             }
         },
         styles: {
-          name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] },
-          title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] },
+          name: { fontSize: 18, bold: true, margin: [0, 0, 0, 1] as [number,number,number,number] },
+          title: { fontSize: 12, color: 'gray', margin: [0, 0, 0, 2] as [number,number,number,number] },
           contactLine: { fontSize: 8, color: '#444444' },
-          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] },
-          sectionHeader: { fontSize: 10, bold: true, margin: [0, 5, 0, 2], decoration: 'underline' },
-          itemTitle: { fontSize: 9, bold: true, margin: [0, 2, 0, 0] },
-          itemSubtitle: { fontSize: 8, italic: true, color: '#333333', margin: [0, 0, 0, 1] },
-          paragraph: { margin: [0, 0, 0, 3], alignment: 'justify' },
-          list: { margin: [10, 1, 0, 3], lineHeight: 1.1 },
-          detailsText: { fontSize: 8, margin: [0, 0, 0, 1] },
-          technologies: { fontSize: 8, italic: true, color: '#555555', margin: [0,0,0,1]},
+          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] as [number,number,number,number] },
+          sectionHeader: { fontSize: 10, bold: true, margin: [0, 5, 0, 2] as [number,number,number,number], decoration: 'underline' },
+          itemTitle: { fontSize: 9, bold: true, margin: [0, 2, 0, 0] as [number,number,number,number] },
+          itemSubtitle: { fontSize: 8, italic: true, color: '#333333', margin: [0, 0, 0, 1] as [number,number,number,number] },
+          paragraph: { margin: [0, 0, 0, 3] as [number,number,number,number], alignment: 'justify' },
+          list: { margin: [10, 1, 0, 3] as [number,number,number,number], lineHeight: 1.1 },
+          detailsText: { fontSize: 8, margin: [0, 0, 0, 1] as [number,number,number,number] },
+          technologies: { fontSize: 8, italic: true, color: '#555555', margin: [0,0,0,1] as [number,number,number,number]},
           link: { color: 'blue', decoration: 'underline', fontSize: 8 }
         },
-        pageMargins: [ 30, 20, 30, 20 ],
+        pageMargins: [ 30, 20, 30, 20 ] as [number,number,number,number],
       };
+      
+      // Improved error catching for pdfMake operations
+      try {
+        const pdfDocGenerator = pdfMake.createPdf(documentDefinition);
+        pdfDocGenerator.download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-FresherResumeBuilder.pdf`);
+        
+        toast({
+          title: "PDF Generated",
+          description: "Your resume PDF has been downloaded.",
+        });
 
-      pdfMake.createPdf(documentDefinition).download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-FresherResumeBuilder.pdf`);
+      } catch (pdfError) {
+        console.error("Error directly from pdfMake.createPdf or .download():", pdfError);
+        toast({
+          title: "PDF Creation/Download Error",
+          description: pdfError instanceof Error ? pdfError.message : "An unknown error occurred while creating or downloading the PDF.",
+          variant: "destructive",
+        });
+      }
 
+    } catch (error) { // This outer catch is for errors in data processing before pdfMake
+      console.error("Error preparing document definition for pdfMake:", error);
       toast({
-        title: "PDF Generated",
-        description: "Your resume PDF has been downloaded.",
-      });
-
-    } catch (error) {
-      console.error("Error generating PDF with pdfMake:", error);
-      toast({
-        title: "Error Generating PDF",
-        description: error instanceof Error ? error.message : "An unknown error occurred while generating the PDF.",
+        title: "Error Preparing PDF",
+        description: error instanceof Error ? error.message : "An unknown error occurred while preparing the PDF document.",
         variant: "destructive",
       });
     } finally {
@@ -295,7 +307,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated programmatically with pdfMake and will use its default built-in fonts (e.g., Helvetica).
+        Note: The PDF is generated programmatically and uses standard fonts (e.g., Helvetica).
         The HTML preview above may differ slightly from the PDF.
       </p>
     </div>
