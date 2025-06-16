@@ -22,11 +22,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Analytics Scripts */}
-        {GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'YOUR_GA_MEASUREMENT_ID' && (
+        {GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'G-R1Z64FCD6P' && (
           <>
             <Script
               strategy="afterInteractive"
-              src={`https://www.googletagmanager.com/gtag/js?id=G-R1Z64FCD6P`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
             />
             <Script
               id="google-analytics"
@@ -36,7 +36,7 @@ export default function RootLayout({
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
-                  gtag('config', 'G-R1Z64FCD6P', {
+                  gtag('config', '${GA_MEASUREMENT_ID}', {
                     page_path: window.location.pathname,
                   });
                 `,
