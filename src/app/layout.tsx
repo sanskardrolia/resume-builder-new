@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Create professional, ATS-friendly resumes with ease using Fresher Resume Builder.',
 };
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-R1Z64FCD6P';
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'YOUR_GA_MEASUREMENT_ID';
 
 export default function RootLayout({
   children,
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Analytics Scripts */}
-        {GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'G-R1Z64FCD6P' && (
+        {GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'YOUR_GA_MEASUREMENT_ID' && (
           <>
             <Script
               strategy="afterInteractive"
