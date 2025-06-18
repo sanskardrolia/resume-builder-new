@@ -132,9 +132,9 @@ export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePrevie
                 <div className="itemSubTitle">{exp.company}</div>
                 {exp.responsibilities && (
                   <ul className="list">
-                    {exp.responsibilities.split('\\n').map((line, idx) => (
-                      line.trim() ? <li key={idx} className="listItem">{line.trim()}</li> : null
-                    )).filter(Boolean)}
+                    {exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line).map((line, idx) => (
+                      <li key={idx} className="listItem">{line}</li>
+                    ))}
                   </ul>
                 )}
               </div>

@@ -11,9 +11,6 @@ import { HtmlResumePreview } from './HtmlResumePreview';
 // Attempt to import pdfmake with explicit .js extensions
 import * as PdfMakeModule from "pdfmake/build/pdfmake.js";
 
-// Import vfs_fonts for its side effects AFTER PdfMakeModule is imported
-import "pdfmake/build/vfs_fonts.js";
-
 // Resolve the actual pdfMake instance.
 let pdfMakeInstance: any;
 if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as any).default.createPdf === 'function') {
@@ -26,20 +23,6 @@ if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as 
 }
 
 const pdfMake = pdfMakeInstance;
-
-// Check if pdfMake.vfs was populated by the side-effect import of vfs_fonts.js
-if (pdfMake && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
-  // console.log("pdfMake.vfs successfully populated after side-effect import of vfs_fonts.js");
-} else {
-  console.error(
-    "CRITICAL: pdfMake.vfs was not populated or is empty after side-effect import of 'pdfmake/build/vfs_fonts'. " +
-    "PDF font embedding will not work if custom fonts were intended. Ensure the vfs_fonts module correctly attaches to the pdfMake instance " +
-    "or that the pdfmake and vfs_fonts versions are compatible.",
-    "Current pdfMake object:", pdfMake,
-    "Current pdfMake.vfs:", (pdfMake && typeof pdfMake === 'object' && pdfMake.vfs) ? pdfMake.vfs : "N/A (pdfMake itself might be undefined or not an object)"
-  );
-}
-
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -76,8 +59,8 @@ const basePdfFontSizes = {
   sectionHeader: 10,
   itemTitle: 9,
   itemSubtitle: 8,
-  paragraph: 9, // Added for consistency with defaultStyle
-  list: 9,      // Assuming list items should match paragraph
+  paragraph: 9, 
+  list: 9,      
   detailsText: 8,
   technologies: 8,
   link: 8,
@@ -170,11 +153,14 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           content.push({ text: exp.jobTitle, style: 'itemTitle' });
           content.push({ text: `${exp.company} | ${formatDateRange(exp.startDate, exp.endDate)}`, style: 'itemSubtitle' });
           if (exp.responsibilities) {
-            content.push({
-              ul: exp.responsibilities.split('\\n').map(line => line.trim()).filter(line => line),
-              style: 'list',
-              margin: [0, 1, 0, 4]
-            });
+            const responsibilityPoints = exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line);
+            if (responsibilityPoints.length > 0) {
+              content.push({
+                ul: responsibilityPoints,
+                style: 'list',
+                margin: [0, 1, 0, 4]
+              });
+            }
           }
         });
       }
@@ -218,7 +204,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         certifications.forEach(cert => {
           const certLine: any[] = [{ text: cert.name, style: 'itemTitle', width: '*' }];
            if (cert.dateEarned) {
-            certLine.push({ text: cert.dateEarned, alignment: 'right', width: 'auto', style: 'itemSubtitle' }); // Applied itemSubtitle for consistency
+            certLine.push({ text: cert.dateEarned, alignment: 'right', width: 'auto', style: 'itemSubtitle' }); 
           }
           content.push({ columns: certLine });
           content.push({ text: cert.issuingOrganization, style: 'itemSubtitle' });
@@ -232,7 +218,6 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
            if (credDetailsArray.length > 0) {
             content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] });
           } else {
-            // Add a small margin even if no cred details to separate entries
             content.push({text: '', margin: [0,0,0, cert === certifications[certifications.length -1] ? 0 : 2]});
           }
         });
@@ -256,7 +241,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           name: { fontSize: s('name'), bold: true, margin: [0, 0, 0, 1] as [number,number,number,number] },
           title: { fontSize: s('title'), color: 'gray', margin: [0, 0, 0, 2] as [number,number,number,number] },
           contactLine: { fontSize: s('contactLine'), color: '#444444' },
-          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] as [number,number,number,number] }, // Font size will be inherited from contactLine
+          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] as [number,number,number,number] }, 
           sectionHeader: { fontSize: s('sectionHeader'), bold: true, margin: [0, 5, 0, 2] as [number,number,number,number], decoration: 'underline' },
           itemTitle: { fontSize: s('itemTitle'), bold: true, margin: [0, 2, 0, 0] as [number,number,number,number] },
           itemSubtitle: { fontSize: s('itemSubtitle'), italic: true, color: '#333333', margin: [0, 0, 0, 1] as [number,number,number,number] },
