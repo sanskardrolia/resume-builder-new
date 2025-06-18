@@ -3,11 +3,11 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { FileText, Moon, Sun, Menu } from 'lucide-react'; // Added Menu icon
+import { FileText, Moon, Sun, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet'; // Added Sheet components
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -26,7 +26,8 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b matte-glass-surface">
-      <div className="container flex h-16 items-center justify-between">
+      {/* Replaced 'container' class with responsive padding */}
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 font-headline text-xl md:text-2xl font-semibold text-foreground">
           <FileText className="h-7 w-7" />
           <span>Fresher Resume Builder</span>
@@ -66,7 +67,8 @@ export function AppHeader() {
                 <div className="p-6 border-b">
                   <Link href="/" className="flex items-center gap-2 font-headline text-xl font-semibold text-foreground" onClick={() => setIsMobileMenuOpen(false)}>
                     <FileText className="h-6 w-6" />
-                    <span>ResuMatic</span>
+                    {/* Updated App Name for consistency in mobile menu */}
+                    <span>Fresher Resume Builder</span> 
                   </Link>
                 </div>
                 <nav className="flex-grow p-6 space-y-2">
@@ -91,7 +93,6 @@ export function AppHeader() {
                     className="w-full justify-start gap-2" 
                     onClick={() => {
                       toggleTheme();
-                      // setIsMobileMenuOpen(false); // Optionally close menu on theme toggle
                     }} 
                     aria-label="Toggle theme"
                   >
