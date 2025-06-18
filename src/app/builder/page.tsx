@@ -36,7 +36,7 @@ export default function BuilderPage() {
           <ResizablePanel 
             defaultSize={isMobile ? 50 : 45} 
             minSize={isMobile ? 40 : 30} 
-            className="min-w-[300px] min-h-[400px]" // Added min-h for vertical
+            className="min-w-[300px]" // Removed min-h-[400px]
           >
             <div className="h-full overflow-y-auto">
               <EditorPanel 
@@ -51,7 +51,7 @@ export default function BuilderPage() {
           <ResizablePanel 
             defaultSize={isMobile ? 50 : 55} 
             minSize={isMobile ? 40 : 30} 
-            className="min-w-[300px] min-h-[400px]" // Changed min-w for consistency and added min-h
+            className="min-w-[300px]" // Removed min-h-[400px]
           >
             <div className="h-full overflow-y-auto">
               <PreviewPanel resumeData={resumeData} fontSizeMultiplier={fontSizeMultiplier} />
