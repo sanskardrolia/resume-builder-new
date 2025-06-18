@@ -1,11 +1,12 @@
 
 import type {Metadata} from 'next';
-import Script from 'next/script'; // Import the Script component
+// Removed Script import as GoogleAnalytics component is used
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AppHeader } from '@/components/shared/AppHeader';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { CustomCursor } from '@/components/shared/CustomCursor'; // Added import
 
 export const metadata: Metadata = {
   title: 'Fresher Resume Builder - Build Your Perfect Resume',
@@ -20,11 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Google Analytics Scripts */}
         <GoogleAnalytics gaId='G-NW9ZSDMP25'/>
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
         <ThemeProvider>
+          <CustomCursor /> {/* Added CustomCursor component */}
           <AppHeader />
           <main className="flex-grow">
             {children}
