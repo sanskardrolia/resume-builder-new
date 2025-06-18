@@ -19,8 +19,10 @@ import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 
 // Set workerSrc to a CDN version. This is crucial for Next.js environments.
-// Make sure the version matches the installed pdfjs-dist version.
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// The version "4.4.175" matches the pdfjs-dist version in package.json.
+// Using a specific version to avoid issues where ${pdfjsLib.version} might
+// resolve to a version not available on CDNJS in some environments.
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.175/pdf.worker.min.js`;
 
 
 interface EditorPanelProps {
