@@ -26,7 +26,7 @@ const pdfMake = pdfMakeInstance;
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
-  fontSizeMultiplier: number; // Added prop
+  fontSizeMultiplier: number; 
 }
 
 const formatDateRange = (startDate?: string, endDate?: string) => {
@@ -97,14 +97,12 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     try {
       const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = resumeData;
       
-      // Scale PDF font sizes
       const s = (key: keyof typeof basePdfFontSizes) => {
         return Math.round(basePdfFontSizes[key] * fontSizeMultiplier);
       };
 
       const content: any[] = [];
 
-      // Personal Info
       if (personalInfo.name) {
         content.push({ text: personalInfo.name, style: 'name', alignment: 'center' });
       }
@@ -233,7 +231,28 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
 
       const documentDefinition = {
         content: content,
+        fonts: { // Define standard fonts that pdfMake recognizes without VFS
+          'Times-Roman': {
+            normal: 'Times-Roman',
+            bold: 'Times-Bold',
+            italics: 'Times-Italic',
+            bolditalics: 'Times-BoldItalic'
+          },
+          Helvetica: { // Keep Helvetica as an option if needed, though not default
+              normal: 'Helvetica',
+              bold: 'Helvetica-Bold',
+              italics: 'Helvetica-Oblique',
+              bolditalics: 'Helvetica-BoldOblique'
+          },
+          Courier: { // Keep Courier as an option
+              normal: 'Courier',
+              bold: 'Courier-Bold',
+              italics: 'Courier-Oblique',
+              bolditalics: 'Courier-BoldOblique'
+          }
+        },
         defaultStyle: {
+          font: 'Times-Roman', // Set default font to Times-Roman
           fontSize: s('default'),
           lineHeight: 1.2,
         },
@@ -312,9 +331,10 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated programmatically and uses standard fonts.
+        Note: The PDF is generated using standard fonts like Times-Roman.
         The HTML preview above may differ slightly from the PDF. Font size changes will apply to both.
       </p>
     </div>
   );
 }
+
