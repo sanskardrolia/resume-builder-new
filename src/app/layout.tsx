@@ -5,6 +5,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AppHeader } from '@/components/shared/AppHeader';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export const metadata: Metadata = {
   title: 'Fresher Resume Builder - Build Your Perfect Resume',
