@@ -17,7 +17,7 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
 
-    --primary: 167 22% 71%; /* Soft Blue #A7C4BC */
+    --primary: 219 78% 66%; /* Cornflower Blue #6495ED */
     --primary-foreground: 0 0% 5%; /* Almost black for text on primary */
 
     --secondary: 0 0% 90%; /* Slightly darker than background */
@@ -34,7 +34,7 @@ body {
 
     --border: 0 0% 85%; /* Border color */
     --input: 0 0% 98%; /* Input background - can be same as card or slightly different */
-    --ring: 167 22% 61%; /* Ring color based on primary */
+    --ring: 219 78% 56%; /* Ring color based on new primary */
 
     --radius: 0.5rem;
 
@@ -67,8 +67,8 @@ body {
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 167 22% 71%; 
-    --primary-foreground: 0 0% 5%;
+    --primary: 219 78% 70%; /* Lighter Cornflower Blue for dark mode */
+    --primary-foreground: 0 0% 5%; /* Dark text on primary for dark mode */
 
     --secondary: 0 0% 20%;
     --secondary-foreground: 0 0% 95%;
@@ -84,7 +84,7 @@ body {
 
     --border: 0 0% 25%;
     --input: 0 0% 15%;
-    --ring: 167 22% 61%;
+    --ring: 219 78% 60%; /* Ring color based on new primary for dark mode */
     
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -155,12 +155,11 @@ body {
   }
 
   .custom-cursor-outline {
-    width: 36px; /* Slightly smaller for a tighter feel */
+    width: 36px;
     height: 36px;
-    background-color: hsla(var(--primary), 0.15); /* Softer glass effect */
-    border: 1px solid hsla(var(--primary), 0.25);
-    backdrop-filter: blur(5px) saturate(120%); /* Adjusted blur and saturate */
-    -webkit-backdrop-filter: blur(5px) saturate(120%); /* Safari */
+    background-color: transparent; /* Removed background for a cleaner ring */
+    border: 2px solid hsla(var(--primary), 0.3); /* Simpler border, using new primary */
+    /* Removed backdrop-filter for glass effect */
   }
 
   .custom-cursor-dot-interactive {
@@ -170,7 +169,7 @@ body {
 
   .custom-cursor-outline-interactive {
     transform: translate(-50%, -50%) scale(1.4); /* Outline expands */
-    background-color: hsla(var(--accent), 0.20); /* Switch to accent color */
-    border-color: hsla(var(--accent), 0.35);
+    background-color: hsla(var(--accent), 0.20); /* Switch to accent color for feedback */
+    border-color: hsla(var(--accent), 0.35); /* Accent border */
   }
 }
