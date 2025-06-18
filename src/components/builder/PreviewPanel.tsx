@@ -275,7 +275,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         
         toast({
           title: "PDF Generated",
-          description: "Your resume PDF has been downloaded.",
+          description: "Your resume PDF has been downloaded. Please check your download tab",
         });
 
       } catch (pdfError) {
@@ -304,7 +304,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       <div className="w-full flex justify-between items-center mb-4">
         <h2 className="font-headline text-2xl font-semibold flex items-center gap-2">
           <Eye className="w-6 h-6 text-primary" />
-          HTML Preview
+          Resume Preview
         </h2>
         <Button
           className="font-headline"

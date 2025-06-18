@@ -30,7 +30,7 @@ export function AppHeader() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 font-headline text-xl md:text-2xl font-semibold text-foreground">
           <FileText className="h-7 w-7" />
-          <span>Fresher Resume Builder</span>
+          <span>ResumMatic</span>
         </Link>
 
         {/* Desktop Navigation */}
