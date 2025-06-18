@@ -13,7 +13,7 @@ export default function HomePage() {
           Craft Your Future: Build a Resume That Opens Doors.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-          Fresher Resume Builder helps you create professional, ATS-friendly resumes with ease.
+          Fresher Resume Builder helps you create professional and ATS-friendly resumes with ease.
           Stop worrying about formatting and start focusing on landing your dream job.
         </p>
         <Button size="lg" asChild className="font-headline">
@@ -66,7 +66,7 @@ export default function HomePage() {
             </div>
             <div className="relative h-64 md:h-96 w-full">
                  <Image 
-                    src="https://placehold.co/600x400.png" 
+                    src="https://ik.imagekit.io/eklbxmf2z/868_1x_shots_so.png?updatedAt=1749900541252" 
                     alt="Resume building process" 
                     fill
                     className="rounded-lg shadow-xl object-cover"
