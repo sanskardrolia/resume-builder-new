@@ -16,9 +16,9 @@ let pdfMakeInstance: any;
 if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as any).default.createPdf === 'function') {
   pdfMakeInstance = (PdfMakeModule as any).default;
 } else if (PdfMakeModule && typeof (PdfMakeModule as any).createPdf === 'function') {
-  pdfMakeInstance = PdfMakeModule; 
+  pdfMakeInstance = PdfMakeModule;
 } else {
-  pdfMakeInstance = {}; 
+  pdfMakeInstance = {};
   console.error("CRITICAL: Could not resolve a valid pdfMake instance from PdfMakeModule. PdfMakeModule content:", PdfMakeModule);
 }
 
@@ -26,7 +26,7 @@ const pdfMake = pdfMakeInstance;
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
-  fontSizeMultiplier: number; 
+  fontSizeMultiplier: number;
 }
 
 const formatDateRange = (startDate?: string, endDate?: string) => {
@@ -59,8 +59,8 @@ const basePdfFontSizes = {
   sectionHeader: 10,
   itemTitle: 9,
   itemSubtitle: 8,
-  paragraph: 9, 
-  list: 9,      
+  paragraph: 9,
+  list: 9,
   detailsText: 8,
   technologies: 8,
   link: 8,
@@ -82,8 +82,8 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         toast({ title: "Preview Loading", description: "Please wait a moment for the preview to initialize." });
         return;
     }
-    
-    if (!pdfMake || typeof pdfMake.createPdf !== 'function') { 
+
+    if (!pdfMake || typeof pdfMake.createPdf !== 'function') {
       toast({
         title: "PDF Generation Error",
         description: "pdfMake library is not loaded correctly or createPdf function is missing. PDF cannot be generated. Check console logs for details.",
@@ -96,7 +96,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     setIsLoading(true);
     try {
       const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = resumeData;
-      
+
       const s = (key: keyof typeof basePdfFontSizes) => {
         return Math.round(basePdfFontSizes[key] * fontSizeMultiplier);
       };
@@ -109,7 +109,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       if (personalInfo.title) {
         content.push({ text: personalInfo.title, style: 'title', alignment: 'center', margin: [0, 0, 0, 3] });
       }
-      
+
       const contactDetailsForPdf: any[] = [];
       if (personalInfo.email) {
         contactDetailsForPdf.push({ text: personalInfo.email, link: `mailto:${personalInfo.email}`, style: 'link' });
@@ -173,7 +173,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           }
         });
       }
-      
+
       if (skills) {
         const skillsList = skills.split(/[\\n,]+/).map(skill => skill.trim()).filter(Boolean);
         if (skillsList.length > 0) {
@@ -196,17 +196,17 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           }
         });
       }
-      
+
       if (certifications && certifications.length > 0) {
         content.push({ text: 'Certifications', style: 'sectionHeader' });
         certifications.forEach(cert => {
           const certLine: any[] = [{ text: cert.name, style: 'itemTitle', width: '*' }];
            if (cert.dateEarned) {
-            certLine.push({ text: cert.dateEarned, alignment: 'right', width: 'auto', style: 'itemSubtitle' }); 
+            certLine.push({ text: cert.dateEarned, alignment: 'right', width: 'auto', style: 'itemSubtitle' });
           }
           content.push({ columns: certLine });
           content.push({ text: cert.issuingOrganization, style: 'itemSubtitle' });
-          
+
           const credDetailsArray: any[] = [];
           if (cert.credentialId) credDetailsArray.push({ text: `ID: ${cert.credentialId}` });
           if (cert.credentialUrl) {
@@ -229,30 +229,18 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         }
       }
 
-      const documentDefinition = {
+      const documentDefinition: any = { // Added 'any' type for flexibility during debugging
         content: content,
-        fonts: { // Define standard fonts that pdfMake recognizes without VFS
-          'Times-Roman': {
-            normal: 'Times-Roman',
-            bold: 'Times-Bold',
-            italics: 'Times-Italic',
-            bolditalics: 'Times-BoldItalic'
-          },
-          Helvetica: { // Keep Helvetica as an option if needed, though not default
-              normal: 'Helvetica',
-              bold: 'Helvetica-Bold',
-              italics: 'Helvetica-Oblique',
-              bolditalics: 'Helvetica-BoldOblique'
-          },
-          Courier: { // Keep Courier as an option
-              normal: 'Courier',
-              bold: 'Courier-Bold',
-              italics: 'Courier-Oblique',
-              bolditalics: 'Courier-BoldOblique'
+        fonts: {
+          'Times-Roman': { // Logical font family name
+            normal: 'Times-Roman',    // Standard PDF Type 1 font
+            bold: 'Times-Bold',        // Standard PDF Type 1 font
+            italics: 'Times-Italic',    // Standard PDF Type 1 font
+            bolditalics: 'Times-BoldItalic' // Standard PDF Type 1 font
           }
         },
         defaultStyle: {
-          font: 'Times-Roman', // Set default font to Times-Roman
+          font: 'Times-Roman', // Use the logical font family name defined above
           fontSize: s('default'),
           lineHeight: 1.2,
         },
@@ -260,7 +248,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           name: { fontSize: s('name'), bold: true, margin: [0, 0, 0, 1] as [number,number,number,number] },
           title: { fontSize: s('title'), color: 'gray', margin: [0, 0, 0, 2] as [number,number,number,number] },
           contactLine: { fontSize: s('contactLine'), color: '#444444' },
-          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] as [number,number,number,number] }, 
+          contactSeparator: { color: '#444444', margin: [0, 0, 0, 0] as [number,number,number,number] },
           sectionHeader: { fontSize: s('sectionHeader'), bold: true, margin: [0, 5, 0, 2] as [number,number,number,number], decoration: 'underline' },
           itemTitle: { fontSize: s('itemTitle'), bold: true, margin: [0, 2, 0, 0] as [number,number,number,number] },
           itemSubtitle: { fontSize: s('itemSubtitle'), italic: true, color: '#333333', margin: [0, 0, 0, 1] as [number,number,number,number] },
@@ -272,11 +260,11 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         },
         pageMargins: [ 30, 20, 30, 20 ] as [number,number,number,number],
       };
-      
+
       try {
         const pdfDocGenerator = pdfMake.createPdf(documentDefinition);
         pdfDocGenerator.download(`${(personalInfo.name || 'Resume').replace(/\s+/g, '_')}-FresherResumeBuilder.pdf`);
-        
+
         toast({
           title: "PDF Generated",
           description: "Your resume PDF has been downloaded. Please check your download tab",
@@ -291,7 +279,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         });
       }
 
-    } catch (error) { 
+    } catch (error) {
       console.error("Error preparing document definition for pdfMake:", error);
       toast({
         title: "Error Preparing PDF",
@@ -337,4 +325,3 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     </div>
   );
 }
-
