@@ -8,9 +8,9 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
-// Attempt to import pdfmake and vfs_fonts with explicit .js extensions
+// Import pdfmake core.
 import * as PdfMakeModule from "pdfmake/build/pdfmake.js";
-import * as pdfFonts from "pdfmake/build/vfs_fonts.js";
+// vfs_fonts.js is removed as we are reverting to standard PDF fonts.
 
 // Resolve the actual pdfMake instance.
 let pdfMakeInstance: any;
@@ -25,23 +25,7 @@ if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as 
 
 const pdfMake = pdfMakeInstance;
 
-// Assign VFS to pdfMake instance
-if (pdfMake && pdfMake.vfs !== undefined && pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) {
-  pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
-} else if (pdfMake && pdfMake.vfs === undefined && pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) {
-  // If pdfMake.vfs is not pre-defined but assignable (less common for standard builds)
-  pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
-  console.log("Assigned vfs_fonts to pdfMake.vfs (was initially undefined).");
-}
-else if (pdfMake && pdfMake.vfs !== undefined && !(pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) ) {
-    console.warn("pdfMake.vfs is defined, but vfs_fonts.js doesn't seem to be in the expected pdfFonts.pdfMake.vfs structure. PDFs might use fallback fonts or fail if custom fonts like Roboto are expected from VFS but not loaded.");
-} else if (!pdfMake || typeof pdfMake.createPdf !== 'function') {
-    console.error("pdfMake instance is not valid, VFS assignment skipped.");
-}
-else {
-  console.error("CRITICAL: Failed to assign vfs_fonts to pdfMake.vfs. PDF generation with Roboto will likely fail or use fallback fonts. Check pdfMake and pdfFonts objects.", { pdfMakeExists: !!pdfMake, pdfFontsExists: !!pdfFonts });
-}
-
+// VFS assignment for Roboto is removed. pdfMake will use its built-in font handling for standard fonts.
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -111,12 +95,6 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake is not loaded.", "pdfMake object:", pdfMake);
       return;
     }
-     if (pdfMake && !pdfMake.vfs) {
-        console.warn("pdfMake.vfs is not populated. Custom fonts like Roboto might not work, falling back to standard PDF fonts. PDF might look different than expected or fail if a font is strictly required.");
-        // Optionally, inform the user if Roboto is critical and VFS failed to load.
-        // toast({ title: "Font Warning", description: "Custom fonts (Roboto) may not load correctly. PDF might use default fonts.", variant: "default" });
-    }
-
 
     setIsLoading(true);
     try {
@@ -254,18 +232,19 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         }
       }
 
-      const documentDefinition: any = { 
+      const documentDefinition: any = {
         content: content,
+        // Using standard PDF fonts. No custom VFS needed.
         fonts: {
-          Roboto: { // Logical font family name for Roboto
-            normal: 'Roboto-Regular.ttf',    // Standard Roboto
-            bold: 'Roboto-Medium.ttf',        // Medium is often used for bold with Roboto in pdfMake
-            italics: 'Roboto-Italic.ttf',    // Italic Roboto
-            bolditalics: 'Roboto-MediumItalic.ttf' // Medium Italic for bold-italic
+          Helvetica: {
+            normal: 'Helvetica',
+            bold: 'Helvetica-Bold',
+            italics: 'Helvetica-Oblique',
+            bolditalics: 'Helvetica-BoldOblique'
           }
         },
         defaultStyle: {
-          font: 'Roboto', // Use the logical font family name defined above
+          font: 'Helvetica', // Default to Helvetica
           fontSize: s('default'),
           lineHeight: 1.2,
         },
@@ -344,12 +323,9 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated using the Roboto font. 
+        Note: The PDF is generated using a standard system font (e.g., Helvetica).
         The HTML preview above may differ slightly from the PDF. Font size changes will apply to both.
       </p>
     </div>
   );
 }
-
-
-    
