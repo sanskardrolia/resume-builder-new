@@ -9,29 +9,37 @@ import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
 // Import pdfmake core and VFS fonts for Roboto.
-import * as PdfMakeModule from "pdfmake/build/pdfmake.js";
-import * as PdfMakeVfsFonts from "pdfmake/build/vfs_fonts.js";
+import pdfMakeBuild from "pdfmake/build/pdfmake.js";
+import pdfFonts from "pdfmake/build/vfs_fonts.js";
 
-// Resolve the actual pdfMake instance.
-let pdfMakeInstance: any;
-if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as any).default.createPdf === 'function') {
-  pdfMakeInstance = (PdfMakeModule as any).default;
-} else if (PdfMakeModule && typeof (PdfMakeModule as any).createPdf === 'function') {
-  pdfMakeInstance = PdfMakeModule;
-} else {
-  pdfMakeInstance = {};
-  console.error("CRITICAL: Could not resolve a valid pdfMake instance from PdfMakeModule. PdfMakeModule content:", PdfMakeModule);
+let pdfMake: any; // This will hold the initialized pdfMake instance
+
+try {
+  // pdfmake.js can export on .default or be the default export itself.
+  if (pdfMakeBuild && typeof (pdfMakeBuild as any).createPdf === 'function') {
+    pdfMake = pdfMakeBuild;
+  } else if (pdfMakeBuild && (pdfMakeBuild as any).default && typeof (pdfMakeBuild as any).default.createPdf === 'function') {
+    pdfMake = (pdfMakeBuild as any).default;
+  } else {
+    console.error("CRITICAL: pdfMake library not loaded correctly or createPdf function is missing.");
+    pdfMake = {}; // Fallback to prevent errors if pdfMake is not found/valid
+  }
+
+  // Assign VFS to pdfMake instance if pdfMake is valid
+  // This is crucial for Roboto and other custom fonts to work client-side.
+  if (pdfMake && typeof pdfMake.createPdf === 'function') {
+    if (pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) {
+      pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
+      console.log("pdfMake VFS assigned successfully.");
+    } else {
+      console.warn("pdfMake VFS data (pdfFonts.pdfMake.vfs) not found or not in expected structure. PDF font issues may occur.", "pdfFonts object:", pdfFonts);
+    }
+  }
+  console.log("Resolved pdfMake instance for use:", pdfMake);
+} catch (e) {
+  console.error("Error during pdfMake/VFS initialization:", e);
+  pdfMake = {}; // Ensure pdfMake is an object to prevent further errors
 }
-
-// Assign VFS to pdfMake instance if available
-if (pdfMakeInstance && pdfMakeInstance.createPdf && PdfMakeVfsFonts && PdfMakeVfsFonts.pdfMake && PdfMakeVfsFonts.pdfMake.vfs) {
-  pdfMakeInstance.vfs = PdfMakeVfsFonts.pdfMake.vfs;
-} else if (pdfMakeInstance && pdfMakeInstance.createPdf) {
-  console.warn("pdfMake instance is available, but VFS fonts (PdfMakeVfsFonts.pdfMake.vfs) could not be assigned. This may lead to font errors or missing characters in PDF.", "PdfMakeVfsFonts object:", PdfMakeVfsFonts);
-}
-
-
-const pdfMake = pdfMakeInstance;
 
 
 interface PreviewPanelProps {
@@ -102,10 +110,10 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake is not loaded.", "pdfMake object:", pdfMake);
       return;
     }
-     if (!pdfMake.vfs) {
+     if (!pdfMake.vfs) { // Check if VFS is populated
         toast({
             title: "PDF Font Error",
-            description: "Font data (VFS) for pdfMake is not loaded. PDF might not render correctly or may fallback to standard fonts. Check console logs.",
+            description: "Font data (VFS) for pdfMake is not loaded. PDF might not render correctly or may fallback to standard fonts. Roboto font might not be available. Check console logs.",
             variant: "destructive",
         });
         console.error("PDF Generation Warning: pdfMake.vfs is not set. Roboto font might not be available.");
@@ -234,6 +242,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
            if (credDetailsArray.length > 0) {
             content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] });
           } else {
+            // Add a small bottom margin even if no credential details, for consistent spacing between entries
             content.push({text: '', margin: [0,0,0, cert === certifications[certifications.length -1] ? 0 : 2]});
           }
         });
@@ -249,16 +258,16 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
 
       const documentDefinition: any = {
         content: content,
-        fonts: {
-          Roboto: { // Define Roboto font family
-            normal: 'Roboto-Regular.ttf',
-            bold: 'Roboto-Medium.ttf', // Or 'Roboto-Bold.ttf' depending on what vfs_fonts provides
-            italics: 'Roboto-Italic.ttf',
-            bolditalics: 'Roboto-MediumItalic.ttf' // Or 'Roboto-BoldItalic.ttf'
+        fonts: { // This defines font families for pdfMake
+          Roboto: { // Logical font family name
+            normal: 'Roboto-Regular.ttf', // Actual font file name in VFS
+            bold: 'Roboto-Medium.ttf',   // For bold style
+            italics: 'Roboto-Italic.ttf', // For italic style
+            bolditalics: 'Roboto-MediumItalic.ttf' // For bold-italic
           }
         },
         defaultStyle: {
-          font: 'Roboto', // Set Roboto as the default font
+          font: 'Roboto', // Use the 'Roboto' family defined above
           fontSize: s('default'),
           lineHeight: 1.2,
         },
