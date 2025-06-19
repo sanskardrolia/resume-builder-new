@@ -329,3 +329,5 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     </div>
   );
 }
+
+    
