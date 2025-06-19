@@ -10,7 +10,7 @@ import { HtmlResumePreview } from './HtmlResumePreview';
 
 // Import pdfmake core and VFS fonts for Roboto.
 import pdfMakeBuild from "pdfmake/build/pdfmake.js";
-import pdfFonts from "pdfmake/build/vfs_fonts.js";
+import pdfFontsBuild from "pdfmake/build/vfs_fonts.js";
 
 let pdfMake: any; // This will hold the initialized pdfMake instance
 
@@ -28,14 +28,24 @@ try {
   // Assign VFS to pdfMake instance if pdfMake is valid
   // This is crucial for Roboto and other custom fonts to work client-side.
   if (pdfMake && typeof pdfMake.createPdf === 'function') {
-    if (pdfFonts && (pdfFonts as any).pdfMake && (pdfFonts as any).pdfMake.vfs) {
-      pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
-      console.log("pdfMake VFS assigned successfully.");
-    } else {
-      console.warn("pdfMake VFS data (pdfFonts.pdfMake.vfs) not found or not in expected structure. PDF font issues may occur.", "pdfFonts object:", pdfFonts);
+    if (pdfFontsBuild && (pdfFontsBuild as any).pdfMake && (pdfFontsBuild as any).pdfMake.vfs) {
+      pdfMake.vfs = (pdfFontsBuild as any).pdfMake.vfs;
+      console.log("pdfMake VFS assigned successfully from pdfFontsBuild.pdfMake.vfs.");
+    } else if (pdfFontsBuild && (pdfFontsBuild as any).vfs) { // Some builds might expose vfs directly
+      pdfMake.vfs = (pdfFontsBuild as any).vfs;
+      console.log("pdfMake VFS assigned successfully from pdfFontsBuild.vfs.");
+    }
+     else {
+      console.warn("pdfMake VFS data (pdfFonts.pdfMake.vfs or pdfFonts.vfs) not found or not in expected structure. PDF font issues may occur.", "pdfFontsBuild object:", pdfFontsBuild);
     }
   }
   console.log("Resolved pdfMake instance for use:", pdfMake);
+  if (pdfMake && pdfMake.vfs) {
+    console.log("pdfMake.vfs content keys (first 10):", Object.keys(pdfMake.vfs).slice(0,10));
+  } else if (pdfMake) {
+    console.warn("pdfMake.vfs is not populated after initialization attempt.");
+  }
+
 } catch (e) {
   console.error("Error during pdfMake/VFS initialization:", e);
   pdfMake = {}; // Ensure pdfMake is an object to prevent further errors
@@ -110,13 +120,15 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake is not loaded.", "pdfMake object:", pdfMake);
       return;
     }
-     if (!pdfMake.vfs) { // Check if VFS is populated
+     if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) {
         toast({
             title: "PDF Font Error",
-            description: "Font data (VFS) for pdfMake is not loaded. PDF might not render correctly or may fallback to standard fonts. Roboto font might not be available. Check console logs.",
+            description: "Font data (VFS) for pdfMake is not loaded or is empty. PDF might not render correctly. Roboto font might not be available. Check console logs.",
             variant: "destructive",
         });
-        console.error("PDF Generation Warning: pdfMake.vfs is not set. Roboto font might not be available.");
+        console.error("PDF Generation Warning: pdfMake.vfs is not set or is empty. Roboto font might not be available.");
+        // Optionally, you could prevent PDF generation here if VFS is critical
+        // return; 
     }
 
     setIsLoading(true);
@@ -258,18 +270,22 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
 
       const documentDefinition: any = {
         content: content,
-        fonts: { // This defines font families for pdfMake
-          Roboto: { // Logical font family name
-            normal: 'Roboto-Regular.ttf', // Actual font file name in VFS
-            bold: 'Roboto-Medium.ttf',   // For bold style
-            italics: 'Roboto-Italic.ttf', // For italic style
-            bolditalics: 'Roboto-MediumItalic.ttf' // For bold-italic
+        fonts: { 
+          Roboto: { 
+            normal: 'Roboto-Regular.ttf', 
+            bold: 'Roboto-Medium.ttf',   
+            italics: 'Roboto-Italic.ttf', 
+            bolditalics: 'Roboto-MediumItalic.ttf' 
           }
         },
         defaultStyle: {
-          font: 'Roboto', // Use the 'Roboto' family defined above
+          font: 'Roboto', 
           fontSize: s('default'),
           lineHeight: 1.2,
+        },
+        hyphenationCallback: function(word: string) {
+          // Prevent hyphenation by returning the word as an array with a single element
+          return [word];
         },
         styles: {
           name: { fontSize: s('name'), bold: true, margin: [0, 0, 0, 1] as [number,number,number,number] },
@@ -287,6 +303,8 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         },
         pageMargins: [ 30, 20, 30, 20 ] as [number,number,number,number],
       };
+      
+      console.log('Document Definition for PDF:', JSON.stringify(documentDefinition, null, 2));
 
       try {
         const pdfDocGenerator = pdfMake.createPdf(documentDefinition);
@@ -355,3 +373,4 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     
 
     
+
