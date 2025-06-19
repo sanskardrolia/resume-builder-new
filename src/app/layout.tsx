@@ -22,6 +22,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <GoogleAnalytics gaId='G-NW9ZSDMP25'/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Helvetica&display=swap" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
         <ThemeProvider>

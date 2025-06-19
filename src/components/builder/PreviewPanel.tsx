@@ -8,9 +8,9 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 
-// Import pdfmake core.
+// Import pdfmake core and VFS fonts for Roboto.
 import * as PdfMakeModule from "pdfmake/build/pdfmake.js";
-// vfs_fonts.js is removed as we are reverting to standard PDF fonts.
+import * as PdfMakeVfsFonts from "pdfmake/build/vfs_fonts.js";
 
 // Resolve the actual pdfMake instance.
 let pdfMakeInstance: any;
@@ -23,9 +23,16 @@ if (PdfMakeModule && (PdfMakeModule as any).default && typeof (PdfMakeModule as 
   console.error("CRITICAL: Could not resolve a valid pdfMake instance from PdfMakeModule. PdfMakeModule content:", PdfMakeModule);
 }
 
+// Assign VFS to pdfMake instance if available
+if (pdfMakeInstance && pdfMakeInstance.createPdf && PdfMakeVfsFonts && PdfMakeVfsFonts.pdfMake && PdfMakeVfsFonts.pdfMake.vfs) {
+  pdfMakeInstance.vfs = PdfMakeVfsFonts.pdfMake.vfs;
+} else if (pdfMakeInstance && pdfMakeInstance.createPdf) {
+  console.warn("pdfMake instance is available, but VFS fonts (PdfMakeVfsFonts.pdfMake.vfs) could not be assigned. This may lead to font errors or missing characters in PDF.", "PdfMakeVfsFonts object:", PdfMakeVfsFonts);
+}
+
+
 const pdfMake = pdfMakeInstance;
 
-// VFS assignment for Roboto is removed. pdfMake will use its built-in font handling for standard fonts.
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -94,6 +101,14 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       });
       console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake is not loaded.", "pdfMake object:", pdfMake);
       return;
+    }
+     if (!pdfMake.vfs) {
+        toast({
+            title: "PDF Font Error",
+            description: "Font data (VFS) for pdfMake is not loaded. PDF might not render correctly or may fallback to standard fonts. Check console logs.",
+            variant: "destructive",
+        });
+        console.error("PDF Generation Warning: pdfMake.vfs is not set. Roboto font might not be available.");
     }
 
     setIsLoading(true);
@@ -234,17 +249,16 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
 
       const documentDefinition: any = {
         content: content,
-        // Using standard PDF fonts. No custom VFS needed.
         fonts: {
-          Helvetica: {
-            normal: 'Helvetica',
-            bold: 'Helvetica-Bold',
-            italics: 'Helvetica-Oblique',
-            bolditalics: 'Helvetica-BoldOblique'
+          Roboto: { // Define Roboto font family
+            normal: 'Roboto-Regular.ttf',
+            bold: 'Roboto-Medium.ttf', // Or 'Roboto-Bold.ttf' depending on what vfs_fonts provides
+            italics: 'Roboto-Italic.ttf',
+            bolditalics: 'Roboto-MediumItalic.ttf' // Or 'Roboto-BoldItalic.ttf'
           }
         },
         defaultStyle: {
-          font: 'Helvetica', // Default to Helvetica
+          font: 'Roboto', // Set Roboto as the default font
           fontSize: s('default'),
           lineHeight: 1.2,
         },
@@ -323,11 +337,12 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated using a standard system font (e.g., Helvetica).
+        Note: The PDF is generated using the Roboto font. 
         The HTML preview above may differ slightly from the PDF. Font size changes will apply to both.
       </p>
     </div>
   );
 }
+    
 
     
