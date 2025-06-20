@@ -3,12 +3,13 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { FileText, Moon, Sun, Menu, Share2 } from 'lucide-react';
+import { FileText, Moon, Sun, Menu, Share2, MessageSquare } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { FeedbackDialog } from '../builder/FeedbackDialog';
+import { ShareDialog } from '../builder/ShareDialog';
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export function AppHeader() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -48,6 +50,10 @@ export function AppHeader() {
               </Button>
             ))}
             <Button variant="outline" size="sm" onClick={() => setIsFeedbackDialogOpen(true)}>
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Feedback
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setIsShareDialogOpen(true)}>
               <Share2 className="w-4 h-4 mr-2" />
               Share
             </Button>
@@ -102,10 +108,22 @@ export function AppHeader() {
                         setIsFeedbackDialogOpen(true);
                         setIsMobileMenuOpen(false);
                       }} 
-                      aria-label="Share and give feedback"
+                      aria-label="Give feedback"
+                    >
+                      <MessageSquare className="h-5 w-5" />
+                      <span>Feedback</span>
+                    </Button>
+                     <Button 
+                      variant="ghost" 
+                      className="w-full justify-start gap-2 mb-2"
+                      onClick={() => {
+                        setIsShareDialogOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }} 
+                      aria-label="Share the app"
                     >
                       <Share2 className="h-5 w-5" />
-                      <span>Share & Feedback</span>
+                      <span>Share</span>
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -130,6 +148,7 @@ export function AppHeader() {
         </div>
       </header>
       <FeedbackDialog isOpen={isFeedbackDialogOpen} onOpenChange={setIsFeedbackDialogOpen} />
+      <ShareDialog isOpen={isShareDialogOpen} onOpenChange={setIsShareDialogOpen} />
     </>
   );
 }
