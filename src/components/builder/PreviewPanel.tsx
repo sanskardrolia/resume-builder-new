@@ -1,9 +1,10 @@
+
 "use client";
 
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, { useState, useRef } from 'react';
+import React, from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
@@ -45,7 +46,7 @@ const createDocumentDefinition = (data: ResumeData): TDocumentDefinitions => {
   if (personalInfo.github) contactItems.push({ text: `github.com/${personalInfo.github}`, link: `https://github.com/${personalInfo.github}`, style: 'link' });
   if (personalInfo.portfolioUrl) contactItems.push({ text: personalInfo.portfolioUrl, link: ensureFullUrl(personalInfo.portfolioUrl), style: 'link' });
 
-  const interspersedContactItems = contactItems.flatMap((item, index) => index < contactItems.length - 1 ? [item, ' | '] : [item]);
+  const interspersedContactItems = contactItems.flatMap((item, index) => index < contactItems.length - 1 ? [item, '  •  '] : [item]);
   content.push({ text: interspersedContactItems, alignment: 'center', style: 'contactLine', margin: [0, 0, 0, 10] });
   
   // --- Summary ---
@@ -132,6 +133,14 @@ const createDocumentDefinition = (data: ResumeData): TDocumentDefinitions => {
 
   return {
     content,
+    fonts: {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      }
+    },
     defaultStyle: { font: 'Roboto', fontSize: 10, lineHeight: 1.15 },
     styles: {
       name: { fontSize: 24, bold: true, margin: [0, 0, 0, 2] },
@@ -157,8 +166,8 @@ interface PreviewPanelProps {
 
 export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelProps) {
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null); // Kept for HtmlResumePreview
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const previewRef = React.useRef<HTMLDivElement>(null); // Kept for HtmlResumePreview
 
   const handleDownloadPdf = async () => {
     setIsGenerating(true);
@@ -168,7 +177,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
 
       // Assign the VFS to pdfMake
-      pdfMakeModule.default.vfs = pdfFontsModule.default.pdfMake.vfs;
+      pdfMakeModule.default.vfs = pdfFontsModule.default.vfs;
 
       const docDefinition = createDocumentDefinition(resumeData);
       const fileName = `${(resumeData.personalInfo?.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`;
@@ -217,7 +226,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
         Note: The downloaded PDF is generated from your data using the Roboto font.
-        What you see is a close preview. Font size changes apply to the preview only.
+        The preview may differ slightly.
       </p>
     </div>
   );
