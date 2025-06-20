@@ -67,8 +67,7 @@ export function AppHeader() {
                 <div className="p-6 border-b">
                   <Link href="/" className="flex items-center gap-2 font-headline text-xl font-semibold text-foreground" onClick={() => setIsMobileMenuOpen(false)}>
                     <FileText className="h-6 w-6" />
-                    {/* Updated App Name for consistency in mobile menu */}
-                    <span>Fresher Resume Builder</span> 
+                    <span>ResumMatic</span> 
                   </Link>
                 </div>
                 <nav className="flex-grow p-6 space-y-2">
