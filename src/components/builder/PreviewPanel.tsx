@@ -6,8 +6,149 @@ import { Download, Eye, Loader2 } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import type { TDocumentDefinitions } from 'pdfmake/interfaces';
+
+// Helper to format dates for the PDF
+const formatDateRange = (startDate?: string, endDate?: string) => {
+  if (!startDate && !endDate) return '';
+  const start = startDate || 'N/A';
+  const end = endDate || 'Present';
+  return `${start} - ${end}`;
+};
+
+// Helper to ensure URLs are absolute
+const ensureFullUrl = (urlInput: string) => {
+  if (!urlInput) return '';
+  if (urlInput.startsWith('http://') || urlInput.startsWith('https://')) {
+    return urlInput;
+  }
+  return `https://${urlInput}`;
+};
+
+// Function to generate the PDF document definition
+const createDocumentDefinition = (data: ResumeData): TDocumentDefinitions => {
+  const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
+
+  const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
+  const hobbiesList = hobbies?.split(/[\n,]+/).map(h => h.trim()).filter(Boolean) || [];
+
+  let content: any[] = [];
+
+  // --- Personal Info ---
+  if (personalInfo.name) content.push({ text: personalInfo.name, style: 'name', alignment: 'center' });
+  if (personalInfo.title) content.push({ text: personalInfo.title, style: 'title', alignment: 'center', margin: [0, 0, 0, 5] });
+  
+  const contactItems: any[] = [];
+  if (personalInfo.email) contactItems.push({ text: personalInfo.email, link: `mailto:${personalInfo.email}`, style: 'link' });
+  if (personalInfo.phone) contactItems.push(personalInfo.phone);
+  if (personalInfo.linkedin) contactItems.push({ text: personalInfo.linkedin, link: ensureFullUrl(personalInfo.linkedin), style: 'link' });
+  if (personalInfo.github) contactItems.push({ text: `github.com/${personalInfo.github}`, link: `https://github.com/${personalInfo.github}`, style: 'link' });
+  if (personalInfo.portfolioUrl) contactItems.push({ text: personalInfo.portfolioUrl, link: ensureFullUrl(personalInfo.portfolioUrl), style: 'link' });
+
+  const interspersedContactItems = contactItems.flatMap((item, index) => index < contactItems.length - 1 ? [item, ' | '] : [item]);
+  content.push({ text: interspersedContactItems, alignment: 'center', style: 'contactLine', margin: [0, 0, 0, 10] });
+  
+  // --- Summary ---
+  if (personalInfo.summary) {
+    content.push({ text: 'Summary', style: 'sectionHeader' });
+    content.push({ text: personalInfo.summary, style: 'paragraph' });
+  }
+
+  // --- Work Experience ---
+  if (workExperience?.length > 0) {
+    content.push({ text: 'Experience', style: 'sectionHeader' });
+    workExperience.forEach(exp => {
+      content.push({ text: exp.jobTitle, style: 'itemTitle' });
+      content.push({ text: `${exp.company} | ${formatDateRange(exp.startDate, exp.endDate)}`, style: 'itemSubtitle' });
+      if (exp.responsibilities) {
+        content.push({
+          ul: exp.responsibilities.split('\n').map(line => line.trim()).filter(line => line),
+          style: 'list'
+        });
+      }
+    });
+  }
+
+  // --- Education ---
+  if (education?.length > 0) {
+    content.push({ text: 'Education', style: 'sectionHeader' });
+    education.forEach(edu => {
+      content.push({ text: edu.degree, style: 'itemTitle' });
+      content.push({ text: `${edu.institution} | ${formatDateRange(edu.startDate, edu.endDate)}`, style: 'itemSubtitle' });
+      if (edu.details) {
+        content.push({ text: edu.details, style: 'detailsText' });
+      }
+    });
+  }
+
+  // --- Skills ---
+  if (skillsList.length > 0) {
+    content.push({ text: 'Skills', style: 'sectionHeader' });
+    content.push({ text: skillsList.join('  •  '), style: 'paragraph' });
+  }
+
+  // --- Projects ---
+  if (projects?.length > 0) {
+    content.push({ text: 'Projects', style: 'sectionHeader' });
+    projects.forEach(proj => {
+      content.push({
+        columns: [
+          { text: proj.title, style: 'itemTitle', width: '*' },
+          proj.link ? { text: 'Link', link: ensureFullUrl(proj.link), style: 'link', alignment: 'right', width: 'auto' } : {},
+        ]
+      });
+      content.push({ text: proj.description, style: 'detailsText', margin: [0, 2, 0, 2] });
+      if (proj.technologies) {
+        content.push({ text: `Technologies: ${proj.technologies}`, style: 'technologies' });
+      }
+    });
+  }
+  
+  // --- Certifications ---
+  if (certifications?.length > 0) {
+    content.push({ text: 'Certifications', style: 'sectionHeader' });
+    certifications.forEach(cert => {
+      content.push({
+        columns: [
+          { text: cert.name, style: 'itemTitle', width: '*' },
+          cert.dateEarned ? { text: cert.dateEarned, style: 'itemSubtitle', alignment: 'right', width: 'auto' } : {}
+        ]
+      });
+      content.push({ text: cert.issuingOrganization, style: 'itemSubtitle' });
+      if(cert.credentialId || cert.credentialUrl) {
+         const creds: any[] = [];
+         if(cert.credentialId) creds.push(`ID: ${cert.credentialId}`);
+         if(cert.credentialUrl) creds.push({ text: 'Verify', link: ensureFullUrl(cert.credentialUrl), style: 'link'});
+         content.push({ text: creds.flatMap((item, index) => index < creds.length - 1 ? [item, ' | '] : [item]), style: 'detailsText'});
+      }
+    });
+  }
+
+  // --- Hobbies ---
+  if (hobbiesList.length > 0) {
+    content.push({ text: 'Hobbies & Interests', style: 'sectionHeader' });
+    content.push({ text: hobbiesList.join('  •  '), style: 'paragraph' });
+  }
+
+  return {
+    content,
+    defaultStyle: { font: 'Roboto', fontSize: 10, lineHeight: 1.15 },
+    styles: {
+      name: { fontSize: 24, bold: true, margin: [0, 0, 0, 2] },
+      title: { fontSize: 14, color: 'gray', margin: [0, 0, 0, 5] },
+      sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 2], decoration: 'underline', decorationColor: '#cccccc' },
+      itemTitle: { fontSize: 11, bold: true, margin: [0, 5, 0, 0] },
+      itemSubtitle: { fontSize: 9, italics: true, color: '#333333', margin: [0, 1, 0, 2] },
+      paragraph: { fontSize: 10, alignment: 'justify', margin: [0, 0, 0, 5] },
+      list: { fontSize: 10, margin: [10, 2, 0, 5] },
+      detailsText: { fontSize: 9, margin: [0, 2, 0, 5] },
+      technologies: { fontSize: 9, italics: true, color: '#555555', margin: [0, 2, 0, 5] },
+      link: { color: 'blue', decoration: 'underline' },
+      contactLine: { fontSize: 9, color: '#444444' }
+    },
+    pageMargins: [40, 40, 40, 40],
+  };
+};
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -17,68 +158,25 @@ interface PreviewPanelProps {
 export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null); // Kept for HtmlResumePreview
 
   const handleDownloadPdf = async () => {
-    const element = previewRef.current;
-    if (!element) {
-      toast({
-        title: 'Error generating PDF',
-        description: 'Preview component is not available.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
     setIsGenerating(true);
-
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Using 'pt' (points) as units, which is common for PDF measurements. A4 is 595.28 x 841.89 pts.
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'pt',
-        format: 'a4',
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-      
-      // Calculate the aspect ratio to fit the image to the PDF's width
-      const ratio = canvasWidth / pdfWidth;
-      const calculatedHeight = canvasHeight / ratio;
-      
-      // Handle multi-page PDFs
-      let heightLeft = calculatedHeight;
-      let position = 0;
+      // Dynamically import pdfmake and vfs_fonts
+      const pdfMakeModule = await import('pdfmake/build/pdfmake');
+      const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
 
-      // Add the first page
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight);
-      heightLeft -= pdfHeight;
+      // Assign the VFS to pdfMake
+      pdfMakeModule.default.vfs = pdfFontsModule.default.pdfMake.vfs;
 
-      // Add more pages if the content is taller than one page
-      while (heightLeft > 0) {
-        position = -pdfHeight * (Math.ceil(calculatedHeight / pdfHeight) - Math.ceil(heightLeft / pdfHeight));
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight);
-        heightLeft -= pdfHeight;
-      }
-      
+      const docDefinition = createDocumentDefinition(resumeData);
       const fileName = `${(resumeData.personalInfo?.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`;
-      pdf.save(fileName);
 
+      // Create and download the PDF
+      pdfMakeModule.default.createPdf(docDefinition).download(fileName);
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error generating PDF with pdfmake:', error);
       toast({
         title: 'Error generating PDF',
         description: 'An unexpected error occurred. Please try again.',
@@ -96,7 +194,6 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           <Eye className="w-6 h-6 text-primary" />
           Resume Preview
         </h2>
-        
         <Button className="font-headline" onClick={handleDownloadPdf} disabled={isGenerating}>
           {isGenerating ? (
             <>
@@ -110,7 +207,6 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
             </>
           )}
         </Button>
-
       </div>
       <div
         className="overflow-auto flex-grow w-full h-[calc(100%-6rem)] border rounded-md bg-white p-2 shadow-inner"
@@ -120,8 +216,8 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The downloaded PDF is a high-quality image of the preview above. 
-        What you see is what you get. Font size changes will apply.
+        Note: The downloaded PDF is generated from your data using the Roboto font.
+        What you see is a close preview. Font size changes apply to the preview only.
       </p>
     </div>
   );
