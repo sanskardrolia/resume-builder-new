@@ -13,32 +13,38 @@ import pdfMakeBuild from "pdfmake/build/pdfmake.js";
 import pdfFontsBuild from "pdfmake/build/vfs_fonts.js";
 
 let pdfMake: any; // This will hold the initialized pdfMake instance
+let vfsFonts: any; // This will hold the VFS data
 
+// Initialize pdfMake and VFS.
+// This block attempts to robustly handle different ways pdfmake might be bundled/exported.
 try {
-  // pdfmake.js can export on .default or be the default export itself.
   if (pdfMakeBuild && typeof (pdfMakeBuild as any).createPdf === 'function') {
     pdfMake = pdfMakeBuild;
   } else if (pdfMakeBuild && (pdfMakeBuild as any).default && typeof (pdfMakeBuild as any).default.createPdf === 'function') {
     pdfMake = (pdfMakeBuild as any).default;
   } else {
     console.error("CRITICAL: pdfMake library not loaded correctly or createPdf function is missing.");
-    pdfMake = {}; // Fallback to prevent errors if pdfMake is not found/valid
+    pdfMake = {}; // Fallback
   }
 
-  // Assign VFS to pdfMake instance if pdfMake is valid
-  // This is crucial for Roboto and other custom fonts to work client-side.
-  if (pdfMake && typeof pdfMake.createPdf === 'function') {
-    if (pdfFontsBuild && (pdfFontsBuild as any).pdfMake && (pdfFontsBuild as any).pdfMake.vfs) {
-      pdfMake.vfs = (pdfFontsBuild as any).pdfMake.vfs;
-      console.log("pdfMake VFS assigned successfully from pdfFontsBuild.pdfMake.vfs.");
-    } else if (pdfFontsBuild && (pdfFontsBuild as any).vfs) { // Some builds might expose vfs directly
-      pdfMake.vfs = (pdfFontsBuild as any).vfs;
-      console.log("pdfMake VFS assigned successfully from pdfFontsBuild.vfs.");
-    }
-     else {
-      console.warn("pdfMake VFS data (pdfFonts.pdfMake.vfs or pdfFonts.vfs) not found or not in expected structure. PDF font issues may occur.", "pdfFontsBuild object:", pdfFontsBuild);
-    }
+  // Handle VFS data, which might be nested differently depending on the build
+  if (pdfFontsBuild && (pdfFontsBuild as any).pdfMake && (pdfFontsBuild as any).pdfMake.vfs) {
+    vfsFonts = (pdfFontsBuild as any).pdfMake.vfs;
+  } else if (pdfFontsBuild && (pdfFontsBuild as any).vfs) { // Common case
+    vfsFonts = (pdfFontsBuild as any).vfs;
+  } else {
+    vfsFonts = {}; // Fallback
+    console.warn("VFS data (pdfFontsBuild.pdfMake.vfs or pdfFontsBuild.vfs) not found. Custom fonts in PDF might not work.");
   }
+  
+  // Assign VFS to pdfMake instance if both are valid
+  if (pdfMake && typeof pdfMake.createPdf === 'function' && vfsFonts && Object.keys(vfsFonts).length > 0) {
+    pdfMake.vfs = vfsFonts;
+    console.log("pdfMake VFS assigned successfully.");
+  } else if (pdfMake && typeof pdfMake.createPdf === 'function') {
+    console.warn("pdfMake instance is valid, but VFS data is missing or empty. Roboto font may not be available for PDF.");
+  }
+
   console.log("Resolved pdfMake instance for use:", pdfMake);
   if (pdfMake && pdfMake.vfs) {
     console.log("pdfMake.vfs content keys (first 10):", Object.keys(pdfMake.vfs).slice(0,10));
@@ -213,10 +219,10 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       }
 
       if (skills) {
-        const skillsList = skills.split(/[\\n,]+/).map(skill => skill.trim()).filter(Boolean);
+        const skillsList = skills.split(/[\\n,]+/).map(skillEntry => skillEntry.trim()).filter(Boolean);
         if (skillsList.length > 0) {
           content.push({ text: 'Skills', style: 'sectionHeader' });
-          content.push({ text: skillsList.join(', '), style: 'paragraph', margin: [0, 0, 0, 5] });
+          content.push({ text: skillsList.join('  •  '), style: 'paragraph', margin: [0, 0, 0, 5] });
         }
       }
 
@@ -261,10 +267,10 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       }
 
       if (hobbies) {
-        const hobbiesList = hobbies.split(/[\\n,]+/).map(hobby => hobby.trim()).filter(Boolean);
+        const hobbiesList = hobbies.split(/[\\n,]+/).map(hobbyEntry => hobbyEntry.trim()).filter(Boolean);
         if (hobbiesList.length > 0) {
           content.push({ text: 'Hobbies & Interests', style: 'sectionHeader' });
-          content.push({ text: hobbiesList.join(', '), style: 'paragraph', margin: [0,0,0,5] });
+          content.push({ text: hobbiesList.join('  •  '), style: 'paragraph', margin: [0,0,0,5] });
         }
       }
 
@@ -373,4 +379,3 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     
 
     
-

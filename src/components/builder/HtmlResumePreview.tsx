@@ -161,7 +161,7 @@ export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePrevie
         {skillsList.length > 0 && (
           <div className="section">
             <div className="sectionTitle">Skills</div>
-            <div className="skillsText">{skillsList.join(', ')}</div>
+            <div className="skillsText">{skillsList.join('  •  ')}</div>
           </div>
         )}
         
@@ -206,7 +206,7 @@ export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePrevie
         {hobbiesList.length > 0 && (
           <div className="section">
             <div className="sectionTitle">Hobbies & Interests</div>
-            <div className="hobbiesText">{hobbiesList.join(', ')}</div>
+            <div className="hobbiesText">{hobbiesList.join('  •  ')}</div>
           </div>
         )}
       </div>

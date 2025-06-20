@@ -51,7 +51,7 @@ export interface ResumeData {
   workExperience: WorkExperienceEntry[];
   projects: ProjectEntry[];
   certifications: CertificationEntry[];
-  skills: string; 
+  skills: string;
   hobbies: string;
 }
 
