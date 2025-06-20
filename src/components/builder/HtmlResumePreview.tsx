@@ -4,11 +4,6 @@
 import type { ResumeData } from '@/lib/types';
 import React from 'react';
 
-interface HtmlResumePreviewProps {
-  data: ResumeData;
-  fontSizeMultiplier: number; // Added prop
-}
-
 // Helper to format dates
 const formatDateRange = (startDate?: string, endDate?: string) => {
   if (!startDate && !endDate) return '';
@@ -44,7 +39,13 @@ const baseHtmlFontSizes = {
   projectLink: 9,
 };
 
-export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePreviewProps) {
+interface HtmlResumePreviewProps {
+  data: ResumeData;
+  fontSizeMultiplier: number;
+}
+
+export const HtmlResumePreview = React.forwardRef<HTMLDivElement, HtmlResumePreviewProps>(
+  ({ data, fontSizeMultiplier }, ref) => {
   const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
 
   const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
@@ -84,7 +85,8 @@ export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePrevie
   `;
 
   return (
-    <>
+    // The ref is attached to this root div, which is then captured by html2canvas
+    <div ref={ref}>
       <style>{styles}</style>
       <div className="resume-preview-container">
         {(personalInfo.name || personalInfo.title || personalInfo.email || personalInfo.phone || personalInfo.linkedin || personalInfo.github || personalInfo.portfolioUrl) && (
@@ -210,6 +212,7 @@ export function HtmlResumePreview({ data, fontSizeMultiplier }: HtmlResumePrevie
           </div>
         )}
       </div>
-    </>
+    </div>
   );
-}
+});
+HtmlResumePreview.displayName = 'HtmlResumePreview';
