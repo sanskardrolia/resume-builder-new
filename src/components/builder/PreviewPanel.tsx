@@ -6,8 +6,14 @@ import { Download, Eye, Loader2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import { ResumeDocument } from './ResumeDocument'; // The new component
+import dynamic from 'next/dynamic';
+import { ResumeDocument } from './ResumeDocument';
+
+// Dynamically import PDFDownloadLink with SSR disabled
+const PDFDownloadLink = dynamic(
+  () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
@@ -18,10 +24,22 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
 
-  // @react-pdf/renderer is client-side only
+  // Set isClient to true after mounting
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Validate resumeData
+  useEffect(() => {
+    if (!resumeData?.personalInfo) {
+      console.warn('resumeData.personalInfo is undefined or invalid:', resumeData);
+      toast({
+        title: 'Invalid Resume Data',
+        description: 'Please ensure all required resume fields are filled.',
+        variant: 'destructive',
+      });
+    }
+  }, [resumeData, toast]);
 
   return (
     <div className="p-6 bg-muted/30 h-full flex flex-col items-center">
@@ -30,19 +48,19 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           <Eye className="w-6 h-6 text-primary" />
           Resume Preview
         </h2>
-        {isClient ? (
+        {isClient && resumeData?.personalInfo ? (
           <PDFDownloadLink
             document={<ResumeDocument data={resumeData} fontSizeMultiplier={fontSizeMultiplier} />}
-            fileName={`${(resumeData.personalInfo.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`}
+            fileName={`${(resumeData.personalInfo?.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`}
           >
             {({ blob, url, loading, error }) => {
               if (error) {
+                console.error('react-pdf error:', error);
                 toast({
                   title: 'Error generating PDF',
                   description: 'There was an error creating your PDF. Please try again.',
                   variant: 'destructive',
                 });
-                console.error("react-pdf error:", error);
               }
 
               return (
@@ -60,7 +78,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         ) : (
           <Button className="font-headline" disabled={true}>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Loading...
+            {resumeData?.personalInfo ? 'Loading...' : 'Invalid Data'}
           </Button>
         )}
       </div>
@@ -68,7 +86,11 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         className="overflow-auto flex-grow w-full h-[calc(100%-6rem)] border rounded-md bg-white p-2 shadow-inner"
       >
         <div className="w-full">
-           {isClient ? <HtmlResumePreview data={resumeData} fontSizeMultiplier={fontSizeMultiplier} /> : <p>Loading preview...</p>}
+          {isClient ? (
+            <HtmlResumePreview data={resumeData} fontSizeMultiplier={fontSizeMultiplier} />
+          ) : (
+            <p>Loading preview...</p>
+          )}
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
