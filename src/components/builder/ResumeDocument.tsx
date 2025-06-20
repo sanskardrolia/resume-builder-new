@@ -4,23 +4,8 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font, Link } from '@react-pdf/renderer';
 import type { ResumeData } from '@/lib/types';
 
-// Register fonts
-// Using Google Fonts URLs. In a real production app, these would be hosted locally.
-Font.register({
-  family: 'Poppins',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/poppins/v21/pxiEyp8kv8JHgFVrJJfecg.ttf' }, // regular
-    { src: 'https://fonts.gstatic.com/s/poppins/v21/pxiByp8kv8JHgFVrLCz7Z11lFc-K.ttf', fontWeight: 'semibold' },
-  ],
-});
-Font.register({
-  family: 'PT Sans',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/ptsans/v17/jizaRExUiTo99u799A.ttf' }, // regular
-    { src: 'https://fonts.gstatic.com/s/ptsans/v17/jizYRExUiTo99u79D0eEwA.ttf', fontStyle: 'italic' },
-    { src: 'https://fonts.gstatic.com/s/ptsans/v17/jizfRExUiTo99u79B_mh0OOtLQ.ttf', fontWeight: 'bold' },
-  ]
-});
+// NOTE: Custom font registration has been removed to ensure PDF generation stability.
+// The PDF will now use default built-in fonts like Helvetica.
 
 // Helper to format dates
 const formatDateRange = (startDate?: string, endDate?: string) => {
@@ -56,7 +41,6 @@ export const ResumeDocument = ({ data, fontSizeMultiplier = 1.0 }: ResumeDocumen
 
     const styles = StyleSheet.create({
         page: {
-            fontFamily: 'PT Sans',
             fontSize: 10 * fontSizeMultiplier,
             padding: '30pt 40pt',
             color: '#333',
@@ -68,9 +52,8 @@ export const ResumeDocument = ({ data, fontSizeMultiplier = 1.0 }: ResumeDocumen
             marginBottom: 20,
         },
         name: {
-            fontFamily: 'Poppins',
             fontSize: 24 * fontSizeMultiplier,
-            fontWeight: 'semibold',
+            fontWeight: 'bold', // Using standard 'bold'
             marginBottom: 2,
         },
         title: {
@@ -97,9 +80,8 @@ export const ResumeDocument = ({ data, fontSizeMultiplier = 1.0 }: ResumeDocumen
             marginBottom: 12,
         },
         sectionTitle: {
-            fontFamily: 'Poppins',
             fontSize: 12 * fontSizeMultiplier,
-            fontWeight: 'semibold',
+            fontWeight: 'bold', // Using standard 'bold'
             textTransform: 'uppercase',
             borderBottomWidth: 1,
             borderBottomColor: '#ccc',

@@ -94,7 +94,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Note: The PDF is generated using Poppins and PT Sans fonts. 
+        Note: The PDF is generated using standard fonts for maximum compatibility. 
         The HTML preview above may differ slightly from the PDF. Font size changes will apply to both.
       </p>
     </div>
