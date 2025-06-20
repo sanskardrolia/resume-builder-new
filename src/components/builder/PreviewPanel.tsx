@@ -10,13 +10,12 @@ import { HtmlResumePreview } from './HtmlResumePreview';
 
 // Import pdfmake core and VFS fonts for Roboto.
 import pdfMakeBuild from "pdfmake/build/pdfmake.js";
-import pdfFontsBuild from "pdfmake/build/vfs_fonts.js";
+// Import vfs_fonts for its side-effect: it populates pdfMakeBuild.vfs
+import "pdfmake/build/vfs_fonts.js"; 
 
 let pdfMake: any; // This will hold the initialized pdfMake instance
-let vfsFonts: any; // This will hold the VFS data
 
-// Initialize pdfMake and VFS.
-// This block attempts to robustly handle different ways pdfmake might be bundled/exported.
+// Initialize pdfMake. vfs_fonts.js should have augmented pdfMakeBuild.
 try {
   if (pdfMakeBuild && typeof (pdfMakeBuild as any).createPdf === 'function') {
     pdfMake = pdfMakeBuild;
@@ -24,37 +23,22 @@ try {
     pdfMake = (pdfMakeBuild as any).default;
   } else {
     console.error("CRITICAL: pdfMake library not loaded correctly or createPdf function is missing.");
-    pdfMake = {}; // Fallback
+    pdfMake = { createPdf: () => ({ download: () => console.error("pdfMake stub used due to load failure.") }) }; // Fallback to prevent runtime errors
   }
 
-  // Handle VFS data, which might be nested differently depending on the build
-  if (pdfFontsBuild && (pdfFontsBuild as any).pdfMake && (pdfFontsBuild as any).pdfMake.vfs) {
-    vfsFonts = (pdfFontsBuild as any).pdfMake.vfs;
-  } else if (pdfFontsBuild && (pdfFontsBuild as any).vfs) { // Common case
-    vfsFonts = (pdfFontsBuild as any).vfs;
-  } else {
-    vfsFonts = {}; // Fallback
-    console.warn("VFS data (pdfFontsBuild.pdfMake.vfs or pdfFontsBuild.vfs) not found. Custom fonts in PDF might not work.");
-  }
-  
-  // Assign VFS to pdfMake instance if both are valid
-  if (pdfMake && typeof pdfMake.createPdf === 'function' && vfsFonts && Object.keys(vfsFonts).length > 0) {
-    pdfMake.vfs = vfsFonts;
-    console.log("pdfMake VFS assigned successfully.");
-  } else if (pdfMake && typeof pdfMake.createPdf === 'function') {
-    console.warn("pdfMake instance is valid, but VFS data is missing or empty. Roboto font may not be available for PDF.");
-  }
-
-  console.log("Resolved pdfMake instance for use:", pdfMake);
-  if (pdfMake && pdfMake.vfs) {
-    console.log("pdfMake.vfs content keys (first 10):", Object.keys(pdfMake.vfs).slice(0,10));
+  // Log the state of pdfMake.vfs after imports
+  if (pdfMake && pdfMake.vfs && Object.keys(pdfMake.vfs).length > 0) {
+    console.log("pdfMake.vfs appears to be populated by vfs_fonts.js import. Number of VFS keys:", Object.keys(pdfMake.vfs).length);
+    console.log("First 5 VFS keys:", Object.keys(pdfMake.vfs).slice(0,5));
   } else if (pdfMake) {
-    console.warn("pdfMake.vfs is not populated after initialization attempt.");
+    console.warn("pdfMake.vfs is NOT populated or is empty after vfs_fonts.js import. Roboto font might not be available.");
+  } else {
+    console.error("pdfMake instance itself is not resolved after imports.");
   }
 
 } catch (e) {
   console.error("Error during pdfMake/VFS initialization:", e);
-  pdfMake = {}; // Ensure pdfMake is an object to prevent further errors
+  pdfMake = { createPdf: () => ({ download: () => console.error("pdfMake stub used due to initialization error.") }) }; // Ensure pdfMake is an object to prevent further errors
 }
 
 
@@ -126,6 +110,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       console.error("PDF Generation Aborted: pdfMake.createPdf is not a function or pdfMake is not loaded.", "pdfMake object:", pdfMake);
       return;
     }
+     // This check is crucial. vfs_fonts.js import should populate pdfMake.vfs
      if (!pdfMake.vfs || Object.keys(pdfMake.vfs).length === 0) {
         toast({
             title: "PDF Font Error",
@@ -133,8 +118,8 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
             variant: "destructive",
         });
         console.error("PDF Generation Warning: pdfMake.vfs is not set or is empty. Roboto font might not be available.");
-        // Optionally, you could prevent PDF generation here if VFS is critical
-        // return; 
+        // Stop PDF generation if fonts are critical and VFS is missing
+        return; 
     }
 
     setIsLoading(true);
@@ -260,7 +245,6 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
            if (credDetailsArray.length > 0) {
             content.push({ text: credDetailsArray, style: 'detailsText', margin: [0,0,0,4] });
           } else {
-            // Add a small bottom margin even if no credential details, for consistent spacing between entries
             content.push({text: '', margin: [0,0,0, cert === certifications[certifications.length -1] ? 0 : 2]});
           }
         });
@@ -290,7 +274,6 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
           lineHeight: 1.2,
         },
         hyphenationCallback: function(word: string) {
-          // Prevent hyphenation by returning the word as an array with a single element
           return [word];
         },
         styles: {
@@ -379,3 +362,4 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
     
 
     
+
