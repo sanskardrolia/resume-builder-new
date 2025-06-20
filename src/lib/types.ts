@@ -74,6 +74,18 @@ export const initialResumeData: ResumeData = {
   hobbies: '',
 };
 
+// Define skills and hobbies as arrays of clean strings then join
+const sampleSkillsArray = [
+  'JavaScript', 'TypeScript', 'React', 'Node.js', 'Express.js', 
+  'Python', 'Django', 'SQL', 'PostgreSQL', 'MongoDB', 'Docker', 
+  'Kubernetes', 'AWS', 'HTML5', 'CSS3', 'TailwindCSS', 'Git'
+];
+
+const sampleHobbiesArray = [
+  'Photography', 'Hiking', 'Contributing to open-source projects', 
+  'Learning new programming languages'
+];
+
 export const sampleResumeData: ResumeData = {
   personalInfo: {
     name: 'John B. Sample',
@@ -147,6 +159,6 @@ export const sampleResumeData: ResumeData = {
       credentialUrl: 'https://example.com/cka-cert',
     },
   ],
-  skills: 'JavaScript, TypeScript, React, Node.js, Express.js, Python, Django, SQL, PostgreSQL, MongoDB, Docker, Kubernetes, AWS, HTML5, CSS3, TailwindCSS, Git',
-  hobbies: 'Photography, Hiking, Contributing to open-source projects, Learning new programming languages',
+  skills: sampleSkillsArray.join(', '), // Join the array to form the string
+  hobbies: sampleHobbiesArray.join(', '), // Join the array to form the string
 };
