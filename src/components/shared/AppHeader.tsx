@@ -7,7 +7,7 @@ import { FileText, Moon, Sun, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -64,12 +64,14 @@ export function AppHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] p-0">
               <div className="flex flex-col h-full">
-                <div className="p-6 border-b">
-                  <Link href="/" className="flex items-center gap-2 font-headline text-xl font-semibold text-foreground" onClick={() => setIsMobileMenuOpen(false)}>
-                    <FileText className="h-6 w-6" />
-                    <span>ResumMatic</span> 
-                  </Link>
-                </div>
+                <SheetHeader className="p-6 border-b text-left">
+                  <SheetTitle>
+                    <Link href="/" className="flex items-center gap-2 font-headline text-xl font-semibold text-foreground" onClick={() => setIsMobileMenuOpen(false)}>
+                      <FileText className="h-6 w-6" />
+                      <span>ResumMatic</span> 
+                    </Link>
+                  </SheetTitle>
+                </SheetHeader>
                 <nav className="flex-grow p-6 space-y-2">
                   {navLinks.map((link) => (
                     <SheetClose asChild key={link.href}>
