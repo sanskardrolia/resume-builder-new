@@ -4,10 +4,11 @@
 import type { ResumeData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import React, from 'react';
+import React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { FeedbackDialog } from './FeedbackDialog';
 
 // Helper to format dates for the PDF
 const formatDateRange = (startDate?: string, endDate?: string) => {
@@ -167,7 +168,8 @@ interface PreviewPanelProps {
 export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
-  const previewRef = React.useRef<HTMLDivElement>(null); // Kept for HtmlResumePreview
+  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = React.useState(false);
+  const previewRef = React.useRef<HTMLDivElement>(null);
 
   const handleDownloadPdf = async () => {
     setIsGenerating(true);
@@ -183,7 +185,10 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
       const fileName = `${(resumeData.personalInfo?.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`;
 
       // Create and download the PDF
-      pdfMakeModule.default.createPdf(docDefinition).download(fileName);
+      pdfMakeModule.default.createPdf(docDefinition).download(fileName, () => {
+        // This callback is a good place to trigger the feedback form.
+        setIsFeedbackDialogOpen(true);
+      });
     } catch (error) {
       console.error('Error generating PDF with pdfmake:', error);
       toast({
@@ -228,6 +233,10 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         Note: The downloaded PDF is generated from your data using the Roboto font.
         The preview may differ slightly.
       </p>
+      <FeedbackDialog 
+        isOpen={isFeedbackDialogOpen} 
+        onOpenChange={setIsFeedbackDialogOpen} 
+      />
     </div>
   );
 }
