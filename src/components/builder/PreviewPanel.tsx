@@ -162,10 +162,9 @@ const createDocumentDefinition = (data: ResumeData): TDocumentDefinitions => {
 
 interface PreviewPanelProps {
   resumeData: ResumeData;
-  fontSizeMultiplier: number;
 }
 
-export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelProps) {
+export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = React.useState(false);
@@ -226,7 +225,7 @@ export function PreviewPanel({ resumeData, fontSizeMultiplier }: PreviewPanelPro
         className="overflow-auto flex-grow w-full h-[calc(100%-6rem)] border rounded-md bg-white p-2 shadow-inner"
       >
         <div className="w-full">
-          <HtmlResumePreview ref={previewRef} data={resumeData} fontSizeMultiplier={fontSizeMultiplier} />
+          <HtmlResumePreview ref={previewRef} data={resumeData} />
         </div>
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">

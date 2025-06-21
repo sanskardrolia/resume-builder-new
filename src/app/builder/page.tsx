@@ -24,7 +24,6 @@ const PreviewPanel = dynamic(
 
 export default function BuilderPage() {
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData);
-  const [fontSizeMultiplier, setFontSizeMultiplier] = useState<number>(1.0);
   const isMobile = useIsMobile(); // Use the hook
 
   return (
@@ -42,8 +41,6 @@ export default function BuilderPage() {
               <EditorPanel 
                 resumeData={resumeData} 
                 setResumeData={setResumeData}
-                fontSizeMultiplier={fontSizeMultiplier}
-                onFontSizeMultiplierChange={setFontSizeMultiplier}
               />
             </div>
           </ResizablePanel>
@@ -54,7 +51,7 @@ export default function BuilderPage() {
             className="min-w-[300px]" // Removed min-h-[400px]
           >
             <div className="h-full overflow-y-auto">
-              <PreviewPanel resumeData={resumeData} fontSizeMultiplier={fontSizeMultiplier} />
+              <PreviewPanel resumeData={resumeData} />
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>

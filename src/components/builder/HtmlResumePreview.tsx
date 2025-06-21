@@ -41,11 +41,10 @@ const baseHtmlFontSizes = {
 
 interface HtmlResumePreviewProps {
   data: ResumeData;
-  fontSizeMultiplier: number;
 }
 
 export const HtmlResumePreview = React.forwardRef<HTMLDivElement, HtmlResumePreviewProps>(
-  ({ data, fontSizeMultiplier }, ref) => {
+  ({ data }, ref) => {
   const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
 
   const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
@@ -53,9 +52,9 @@ export const HtmlResumePreview = React.forwardRef<HTMLDivElement, HtmlResumePrev
 
   const baseFontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
 
-  // Scale font sizes
+  // Calculate font sizes
   const s = (key: keyof typeof baseHtmlFontSizes) => {
-    return (baseHtmlFontSizes[key] * fontSizeMultiplier).toFixed(2); // Keep 2 decimal places for pt
+    return (baseHtmlFontSizes[key]).toFixed(2); // Keep 2 decimal places for pt
   };
 
   const styles = `

@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ResumeData } from '@/lib/types';
@@ -12,7 +13,6 @@ import { ProjectsForm } from './ProjectsForm';
 import { CertificationsForm } from './CertificationsForm';
 import { SkillsForm } from './SkillsForm';
 import { HobbiesForm } from './HobbiesForm';
-import { FontSizeControl } from './FontSizeControl';
 import React from 'react'; // Removed useRef, useState
 import { useToast } from '@/hooks/use-toast';
 // Removed pdfjsLib import and workerSrc configuration
@@ -20,15 +20,11 @@ import { useToast } from '@/hooks/use-toast';
 interface EditorPanelProps {
   resumeData: ResumeData;
   setResumeData: React.Dispatch<React.SetStateAction<ResumeData>>;
-  fontSizeMultiplier: number;
-  onFontSizeMultiplierChange: (multiplier: number) => void;
 }
 
 export function EditorPanel({ 
   resumeData, 
   setResumeData,
-  fontSizeMultiplier,
-  onFontSizeMultiplierChange
 }: EditorPanelProps) {
   const { toast } = useToast();
   // Removed fileInputRef and isUploading state
@@ -77,10 +73,6 @@ export function EditorPanel({
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="font-headline text-2xl font-semibold text-center md:text-left">Edit Your Resume</h2>
         <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <FontSizeControl 
-            currentMultiplier={fontSizeMultiplier}
-            onFontSizeMultiplierChange={onFontSizeMultiplierChange}
-          />
           <Button onClick={loadSampleData} variant="outline" size="sm">
             <Wand2 className="w-4 h-4 mr-2" />
             Load Sample Data
