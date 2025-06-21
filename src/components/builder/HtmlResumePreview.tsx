@@ -45,7 +45,7 @@ interface HtmlResumePreviewProps {
 
 export const HtmlResumePreview = React.forwardRef<HTMLDivElement, HtmlResumePreviewProps>(
   ({ data }, ref) => {
-  const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
+  const { personalInfo, education, workExperience, projects, certifications, extraCurricular, skills, hobbies } = data;
 
   const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
   const hobbiesList = hobbies?.split(/[\n,]+/).map(h => h.trim()).filter(Boolean) || [];
@@ -198,6 +198,28 @@ export const HtmlResumePreview = React.forwardRef<HTMLDivElement, HtmlResumePrev
                     {cert.credentialId && cert.credentialUrl && <span> | </span>}
                     {cert.credentialUrl && <a href={ensureFullUrl(cert.credentialUrl)} target="_blank" rel="noopener noreferrer">Verify</a>}
                   </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {extraCurricular && extraCurricular.length > 0 && (
+          <div className="section">
+            <div className="sectionTitle">Extra-Curricular Activities</div>
+            {extraCurricular.map(activity => (
+              <div key={activity.id} className="entry">
+                <div className="entryHeader">
+                  <span className="itemTitle">{activity.activity}</span>
+                  <span className="itemDates">{formatDateRange(activity.startDate, activity.endDate)}</span>
+                </div>
+                <div className="itemSubTitle">{activity.organization}</div>
+                {activity.description && (
+                  <ul className="list">
+                    {activity.description.split('\n').map(line => line.trim()).filter(line => line).map((line, idx) => (
+                      <li key={idx} className="listItem">{line}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))}

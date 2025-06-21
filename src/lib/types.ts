@@ -37,12 +37,21 @@ export interface ProjectEntry {
 }
 
 export interface CertificationEntry {
-  id: string;
+  id:string;
   name: string;
   issuingOrganization: string;
   dateEarned: string;
   credentialId?: string;
   credentialUrl?: string;
+}
+
+export interface ExtraCurricularEntry {
+  id: string;
+  activity: string;
+  organization: string;
+  startDate: string;
+  endDate: string;
+  description: string;
 }
 
 export interface ResumeData {
@@ -51,6 +60,7 @@ export interface ResumeData {
   workExperience: WorkExperienceEntry[];
   projects: ProjectEntry[];
   certifications: CertificationEntry[];
+  extraCurricular: ExtraCurricularEntry[];
   skills: string;
   hobbies: string;
 }
@@ -70,6 +80,7 @@ export const initialResumeData: ResumeData = {
   workExperience: [],
   projects: [],
   certifications: [],
+  extraCurricular: [],
   skills: '',
   hobbies: '',
 };
@@ -158,6 +169,24 @@ export const sampleResumeData: ResumeData = {
       credentialId: 'LF-abc123xyz',
       credentialUrl: 'https://example.com/cka-cert',
     },
+  ],
+  extraCurricular: [
+    {
+      id: 'extra_curricular_1',
+      activity: 'Head of Event Management',
+      organization: 'Annual Tech Symposium',
+      startDate: 'Jan 2021',
+      endDate: 'Mar 2021',
+      description: 'Organized and managed a 3-day national level tech fest with over 5000 participants.\nCoordinated with sponsors, speakers, and managed a team of 30 volunteers.'
+    },
+    {
+      id: 'extra_curricular_2',
+      activity: 'Core Member',
+      organization: 'Open Source Development Club',
+      startDate: 'Aug 2019',
+      endDate: 'May 2022',
+      description: 'Contributed to several open-source projects.\nConducted workshops on Git and GitHub for beginners.'
+    }
   ],
   skills: sampleSkillsArray.join(', '), // Join the array to form the string
   hobbies: sampleHobbiesArray.join(', '), // Join the array to form the string

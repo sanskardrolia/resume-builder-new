@@ -29,7 +29,7 @@ const ensureFullUrl = (urlInput: string) => {
 
 // Function to generate the PDF document definition
 const createDocumentDefinition = (data: ResumeData): TDocumentDefinitions => {
-  const { personalInfo, education, workExperience, projects, certifications, skills, hobbies } = data;
+  const { personalInfo, education, workExperience, projects, certifications, extraCurricular, skills, hobbies } = data;
 
   const skillsList = skills?.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) || [];
   const hobbiesList = hobbies?.split(/[\n,]+/).map(h => h.trim()).filter(Boolean) || [];
@@ -122,6 +122,21 @@ const createDocumentDefinition = (data: ResumeData): TDocumentDefinitions => {
          if(cert.credentialId) creds.push(`ID: ${cert.credentialId}`);
          if(cert.credentialUrl) creds.push({ text: 'Verify', link: ensureFullUrl(cert.credentialUrl), style: 'link'});
          content.push({ text: creds.flatMap((item, index) => index < creds.length - 1 ? [item, ' | '] : [item]), style: 'detailsText'});
+      }
+    });
+  }
+  
+  // --- Extra-Curricular Activities ---
+  if (extraCurricular?.length > 0) {
+    content.push({ text: 'Extra-Curricular Activities', style: 'sectionHeader' });
+    extraCurricular.forEach(activity => {
+      content.push({ text: activity.activity, style: 'itemTitle' });
+      content.push({ text: `${activity.organization} | ${formatDateRange(activity.startDate, activity.endDate)}`, style: 'itemSubtitle' });
+      if (activity.description) {
+        content.push({
+          ul: activity.description.split('\n').map(line => line.trim()).filter(line => line),
+          style: 'list'
+        });
       }
     });
   }

@@ -5,17 +5,17 @@ import type { ResumeData } from '@/lib/types';
 import { sampleResumeData } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
-import { Wand2 } from 'lucide-react'; // Removed UploadCloud, Loader2
+import { Wand2 } from 'lucide-react';
 import { PersonalInfoForm } from './PersonalInfoForm';
 import { EducationForm } from './EducationForm';
 import { WorkExperienceForm } from './WorkExperienceForm';
 import { ProjectsForm } from './ProjectsForm';
 import { CertificationsForm } from './CertificationsForm';
+import { ExtraCurricularForm } from './ExtraCurricularForm';
 import { SkillsForm } from './SkillsForm';
 import { HobbiesForm } from './HobbiesForm';
-import React from 'react'; // Removed useRef, useState
+import React from 'react';
 import { useToast } from '@/hooks/use-toast';
-// Removed pdfjsLib import and workerSrc configuration
 
 interface EditorPanelProps {
   resumeData: ResumeData;
@@ -27,7 +27,6 @@ export function EditorPanel({
   setResumeData,
 }: EditorPanelProps) {
   const { toast } = useToast();
-  // Removed fileInputRef and isUploading state
 
   const handlePersonalInfoChange = (field: keyof ResumeData['personalInfo'], value: string) => {
     setResumeData(prev => ({ ...prev, personalInfo: { ...prev.personalInfo, [field]: value } }));
@@ -49,6 +48,10 @@ export function EditorPanel({
     setResumeData(prev => ({ ...prev, certifications: updatedEntries }));
   };
 
+  const handleExtraCurricularChange = (updatedEntries: ResumeData['extraCurricular']) => {
+    setResumeData(prev => ({ ...prev, extraCurricular: updatedEntries }));
+  };
+
   const handleSkillsChange = (value: string) => { 
     setResumeData(prev => ({ ...prev, skills: value }));
   };
@@ -65,8 +68,6 @@ export function EditorPanel({
       description: "The sample resume data has been loaded into the editor.",
     });
   };
-
-  // Removed handlePdfUploadClick and handleFileChange functions
 
   return (
     <div className="p-6 space-y-6 overflow-y-auto h-full">
@@ -114,6 +115,12 @@ export function EditorPanel({
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Certifications</AccordionTrigger>
           <AccordionContent>
             <CertificationsForm data={resumeData.certifications} onChange={handleCertificationsChange} />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="extra-curricular">
+          <AccordionTrigger className="font-headline text-lg hover:no-underline">Extra-Curricular Activities</AccordionTrigger>
+          <AccordionContent>
+            <ExtraCurricularForm data={resumeData.extraCurricular} onChange={handleExtraCurricularChange} />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="hobbies">
