@@ -38,7 +38,7 @@ export function AdPlaceholder() {
           </div>
           <div className="relative h-16 w-16 flex-shrink-0">
              <Image
-              src="https://placehold.co/128x128.png"
+              src="https://ik.imagekit.io/eklbxmf2z/Resumatic%20Ad.png?updatedAt=1750505173253"
               alt="Advertisement placeholder"
               fill
               className="rounded-md object-cover"
