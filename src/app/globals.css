@@ -34,7 +34,7 @@ body {
 
     --border: 0 0% 85%; /* Border color */
     --input: 0 0% 98%; /* Input background - can be same as card or slightly different */
-    --ring: 219 78% 56%; /* Ring color based on new primary */
+    --ring: 190 54% 39%; /* Ring color based on accent */
 
     --radius: 0.5rem;
 
@@ -84,7 +84,7 @@ body {
 
     --border: 0 0% 25%;
     --input: 0 0% 15%;
-    --ring: 219 78% 60%; /* Ring color based on new primary for dark mode */
+    --ring: 190 54% 45%; /* Ring color based on accent for dark mode */
     
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
