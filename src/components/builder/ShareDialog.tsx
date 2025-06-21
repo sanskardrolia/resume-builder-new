@@ -41,10 +41,10 @@ export function ShareDialog({ isOpen, onOpenChange }: ShareDialogProps) {
 
   const shareUrl = "https://fresher-resume.vercel.app/builder";
   const shareMessages = {
-    whatsapp: `Hey! I just built my resume using ResuMatic, a fantastic tool for creating professional resumes. You should check it out: ${shareUrl}`,
-    linkedinTitle: "ResuMatic: The AI-Powered Resume Builder",
-    linkedinSummary: `I just created my resume with ResuMatic and it was a breeze! It's a great tool for crafting professional, ATS-friendly resumes. Highly recommended for anyone on the job hunt. #ResumeBuilder #JobSearch #Career`,
-    instagram: `Check out ResuMatic for building a great resume! ${shareUrl}`
+    whatsapp: `Hey! I just built my resume using MakeItResume, a fantastic tool for creating professional resumes. You should check it out: ${shareUrl}`,
+    linkedinTitle: "MakeItResume: The AI-Powered Resume Builder",
+    linkedinSummary: `I just created my resume with MakeItResume and it was a breeze! It's a great tool for crafting professional, ATS-friendly resumes. Highly recommended for anyone on the job hunt. #ResumeBuilder #JobSearch #Career`,
+    instagram: `Check out MakeItResume for building a great resume! ${shareUrl}`
   };
 
   const handleCopyToClipboard = () => {
@@ -62,9 +62,9 @@ export function ShareDialog({ isOpen, onOpenChange }: ShareDialogProps) {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Share ResuMatic</DialogTitle>
+          <DialogTitle>Share MakeItResume</DialogTitle>
           <DialogDescription>
-            Enjoying ResuMatic? Spread the word and help your connections!
+            Enjoying MakeItResume? Spread the word and help your connections!
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 text-center pt-4">

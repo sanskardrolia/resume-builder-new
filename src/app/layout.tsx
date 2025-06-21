@@ -8,8 +8,8 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { CustomCursor } from '@/components/shared/CustomCursor';
 
 export const metadata: Metadata = {
-  title: 'ResuMatic - Build Your Perfect Resume',
-  description: 'Create professional, ATS-friendly resumes with ease using ResuMatic.',
+  title: 'MakeItResume - Build Your Perfect Resume',
+  description: 'Create professional, ATS-friendly resumes with ease using MakeItResume.',
 };
 
 export default function RootLayout({

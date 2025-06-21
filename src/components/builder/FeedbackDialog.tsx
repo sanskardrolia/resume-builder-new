@@ -61,7 +61,7 @@ export function FeedbackDialog({ isOpen, onOpenChange }: FeedbackDialogProps) {
       if (response.ok) {
         toast({
           title: "Feedback Sent!",
-          description: "Thank you for helping us improve ResuMatic.",
+          description: "Thank you for helping us improve MakeItResume.",
         });
         form.reset();
         onOpenChange(false); // Close the dialog on successful submission
@@ -93,7 +93,7 @@ export function FeedbackDialog({ isOpen, onOpenChange }: FeedbackDialogProps) {
         <DialogHeader>
           <DialogTitle>Share Your Feedback</DialogTitle>
           <DialogDescription>
-            We'd love to hear what you think! Your feedback helps us make ResuMatic better.
+            We'd love to hear what you think! Your feedback helps us make MakeItResume better.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">

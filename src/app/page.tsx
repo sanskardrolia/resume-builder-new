@@ -13,7 +13,7 @@ export default function HomePage() {
           Craft Your Future: Build a Resume That Opens Doors.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-          ResuMatic helps you create professional and ATS-friendly resumes with ease.
+          MakeItResume helps you create professional and ATS-friendly resumes with ease.
           Stop worrying about formatting and start focusing on landing your dream job.
         </p>
         <Button size="lg" asChild className="font-headline">
@@ -23,7 +23,7 @@ export default function HomePage() {
 
       <section className="py-16 md:py-24">
         <div className="text-center mb-12">
-          <h2 className="font-headline text-3xl font-semibold">Why ResuMatic?</h2>
+          <h2 className="font-headline text-3xl font-semibold">Why MakeItResume?</h2>
           <p className="text-muted-foreground mt-2">Everything you need to create a standout resume.</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -58,7 +58,7 @@ export default function HomePage() {
                     In today's competitive job market, a well-crafted resume is more than just a document – it's your personal marketing tool. It's often the first impression a potential employer has of you.
                 </p>
                 <p className="text-muted-foreground mb-4 text-lg">
-                    ResuMatic empowers you to present your skills and experiences in the best possible light. Our ATS-friendly design ensures your application bypasses automated filters and reaches human eyes.
+                    MakeItResume empowers you to present your skills and experiences in the best possible light. Our ATS-friendly design ensures your application bypasses automated filters and reaches human eyes.
                 </p>
                 <Button asChild className="mt-4 font-headline">
                     <Link href="/builder">Get Started for Free</Link>

@@ -196,7 +196,7 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
       pdfMakeModule.default.vfs = pdfFontsModule.default.vfs;
 
       const docDefinition = createDocumentDefinition(resumeData);
-      const fileName = `${(resumeData.personalInfo?.name || 'Resume').replace(/\s+/g, '_')}-ResuMatic.pdf`;
+      const fileName = `${(resumeData.personalInfo?.name || 'Resume').replace(/\s+/g, '_')}-MakeItResume.pdf`;
 
       // Create and download the PDF
       pdfMakeModule.default.createPdf(docDefinition).download(fileName, () => {

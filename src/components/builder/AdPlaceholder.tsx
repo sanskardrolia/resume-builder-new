@@ -31,7 +31,7 @@ export function AdPlaceholder() {
       <Link href="https://www.linkedin.com/in/sanskardrolia/" target="_blank" rel="noopener noreferrer" className="block hover:bg-card/70 transition-colors">
         <CardContent className="p-4 flex items-center gap-4">
           <div className="flex-1">
-            <h3 className="font-headline font-semibold text-base">Advertise on ResuMatic</h3>
+            <h3 className="font-headline font-semibold text-base">Advertise on MakeItResume</h3>
             <p className="text-sm text-muted-foreground mt-1">
               Reach thousands of professionals and job seekers.
             </p>

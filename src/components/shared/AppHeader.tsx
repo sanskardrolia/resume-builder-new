@@ -34,7 +34,7 @@ export function AppHeader() {
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2 font-headline text-xl md:text-2xl font-semibold text-foreground">
             <FileText className="h-7 w-7" />
-            <span>ResuMatic</span>
+            <span>MakeItResume</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -80,7 +80,7 @@ export function AppHeader() {
                     <SheetTitle>
                       <Link href="/" className="flex items-center gap-2 font-headline text-xl font-semibold text-foreground" onClick={() => setIsMobileMenuOpen(false)}>
                         <FileText className="h-6 w-6" />
-                        <span>ResuMatic</span> 
+                        <span>MakeItResume</span> 
                       </Link>
                     </SheetTitle>
                   </SheetHeader>
