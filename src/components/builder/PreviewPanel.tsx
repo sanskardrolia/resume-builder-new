@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { ResumeData } from '@/lib/types';
@@ -9,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HtmlResumePreview } from './HtmlResumePreview';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { FeedbackDialog } from './FeedbackDialog';
+import { AdPlaceholder } from './AdPlaceholder';
 
 // Helper to format dates for the PDF
 const formatDateRange = (startDate?: string, endDate?: string) => {
@@ -216,8 +216,8 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
   };
 
   return (
-    <div className="p-6 bg-muted/30 h-full flex flex-col items-center">
-      <div className="w-full flex justify-between items-center mb-4">
+    <div className="p-6 bg-muted/30 h-full flex flex-col items-center gap-4">
+      <div className="w-full flex justify-between items-center flex-shrink-0">
         <h2 className="font-headline text-2xl font-semibold flex items-center gap-2">
           <Eye className="w-6 h-6 text-primary" />
           Resume Preview
@@ -237,16 +237,22 @@ export function PreviewPanel({ resumeData }: PreviewPanelProps) {
         </Button>
       </div>
       <div
-        className="overflow-auto flex-grow w-full h-[calc(100%-6rem)] border rounded-md bg-white p-2 shadow-inner"
+        className="overflow-auto flex-grow w-full border rounded-md bg-white p-2 shadow-inner"
       >
         <div className="w-full">
           <HtmlResumePreview ref={previewRef} data={resumeData} />
         </div>
       </div>
-      <p className="text-xs text-muted-foreground mt-2 text-center">
+
+      <div className="w-full flex-shrink-0">
+        <AdPlaceholder />
+      </div>
+
+      <p className="text-xs text-muted-foreground text-center flex-shrink-0">
         Note: The downloaded PDF is generated from your data using the Roboto font.
         The preview may differ slightly.
       </p>
+
       <FeedbackDialog 
         isOpen={isFeedbackDialogOpen} 
         onOpenChange={setIsFeedbackDialogOpen} 
