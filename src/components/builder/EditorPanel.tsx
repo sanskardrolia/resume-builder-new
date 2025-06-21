@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { ResumeData } from '@/lib/types';
@@ -75,10 +74,13 @@ export function EditorPanel({
 
   return (
     <div className="p-6 space-y-6 overflow-y-auto h-full">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 sm:gap-0">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="font-headline text-2xl font-semibold text-center md:text-left">Edit Your Resume</h2>
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* PDF Upload button and input removed */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <FontSizeControl 
+            currentMultiplier={fontSizeMultiplier}
+            onFontSizeMultiplierChange={onFontSizeMultiplierChange}
+          />
           <Button onClick={loadSampleData} variant="outline" size="sm">
             <Wand2 className="w-4 h-4 mr-2" />
             Load Sample Data
@@ -90,15 +92,6 @@ export function EditorPanel({
           <AccordionTrigger className="font-headline text-lg hover:no-underline">Personal Information</AccordionTrigger>
           <AccordionContent>
             <PersonalInfoForm data={resumeData.personalInfo} onChange={handlePersonalInfoChange} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="font-size">
-          <AccordionTrigger className="font-headline text-lg hover:no-underline">Appearance</AccordionTrigger>
-          <AccordionContent>
-            <FontSizeControl 
-              currentMultiplier={fontSizeMultiplier}
-              onMultiplierChange={onFontSizeMultiplierChange}
-            />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="education">
